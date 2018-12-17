@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The SPIPortFS Class</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO SPI/SPI Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The SPIPortFS Class</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_SPIPortEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_SPISlaveDeviceHandle.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="SPIPort Class"></A>
+<h2>The SPIPortFS Class</h2>
+<P>
+The SPIPort class writes to and reads from the SPI bus On Chip Peripheral (OCP) device integrated into the Raspberry Pi 2 CPU via the
+SPIDev device driver access method. At this time there is no RPICSIO class of similar functionality which uses the Memory Mapped access method. 
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/SPIPortFS.cs.html">browseable form</a>.
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Example Code</h3>
+<DL>
+Example code which demonstrates the use of this class can be found on the <a href="RPICSIOHelp_SPIPortExample.html">SPI Port Example</a> page.
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<code>public class SPIPortFS : PortFS</code>
+<P>
+<DL>Provides Serial Peripheral Interconnect (SPI) port functionality for a Raspberry Pi (SPIDev Version).</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Constructors</h3>
+<DL>
+<P>
+<code>public SPIPortFS(SPIPortEnum spiPortIn) : base(GpioEnum.GPIO_NONE)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>spiPortIn - The SPI port to access.
+</DL>
+
+<P>
+&nbsp;
+<P>
+</DL>
+<h3>Public Methods</h3>
+<DL>
+<code>public override void ClosePort()</code>
+<P>
+<DL>Closes the port. Because we do not open the port at the PortFS level
+we cannot close it there either. This overrides the PortFS.ClosePort()
+and does what is necessary internally to close things up.</DL>
+</DL>
+<P>
+&nbsp;
+<P>
+<DL>
+<code>public void Dispose()</code>
+<P>
+<DL>Implements IDisposable. Should be called after the class is closed to release resources.</DL>
+<P>
+&nbsp;
+<P>
+<code>public SPISlaveDeviceHandle EnableSPIGPIOSlaveDevice(GpioEnum gpioEnum)</code>
+<P>
+<DL>Enables the SPI slave device which uses a GPIO pin as a slave select.
+<P>
+When using a GPIO pin as a slave select line
+we still need to open a SPIDev device because we need a device to
+send the data to. The way SPIDev works each spidev device is 
+fundamentally associated with a particular slave select line and 
+this cannot be changed. The GPIO line will be used as a separate
+slave select but the spidev device specific slave select will also
+be asserted whenever the device is writtent to. 
+<P>
+In order to use a GPIO as a slave select you must ignore and not
+electrically attach anything to the slave select pin the SPIDEV
+device uses as it will be asserted on each write. 
+<P>
+In other words, the SPIDev device is needed to shift the data in 
+and out, however you must ignore its internal slave select line 
+entirely if you wish to use GPIO based slave selects. Otherwise
+any device attached to it will be receive every write to the 
+SPIPort no matter which GPIO slave select is also asserted.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>gpioEnum</i>, The GPIO of the pin we use as the slave select.
+<P>
+<DT>Returns
+<DD>The handle for the Slave Device or null for fail.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public SPISlaveDeviceHandle EnableSPISlaveDevice(SPISlaveDeviceEnum spiSlaveDeviceIn)</code>
+<P>
+<DL>Enables the SPI slave device. Will throw exceptions if it cannot open the
+device</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>spiSlaveDeviceIn</i>, The SPI Slave Device to configure.
+<P>
+<DT>Returns
+<DD>The handle for the Slave Device or null for fail.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public uint GetDefaultSpeedInHz()</code>
+<P>
+<DL>Gets the Default SPI speed in Hertz. This value can be overridden on 
+a per slave basis by setting the SpeedInHz in the SPISlaveDeviceHandle</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>The spi port speed in Hertz.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public SPIModeEnum GetMode()</code>
+<P>
+<DL>Gets the SPI mode. This is used for all Slave Devices on the port
+It cannot be individually set on a per slave basis. At least one
+non-GPIO slave must be enabled</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>The spi mode.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public override PortDirectionEnum PortDirection()</code>
+<P>
+<DL>Gets the PortDirection</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>A <i>PortDirectionEnum</i> value. This value is always <i>PortDirectionEnum.PORTDIR_INPUTOUTPUT</i>.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public void SPITransfer(SPISlaveDeviceHandle ssHandle, byte[] txByteBuf, byte[] rxByteBuf, int numBytes)</code>
+<P>
+<DL>Writes/Reads a buffer out/in to/from an SPI Slave Device. 
+<P>
+Note that the SPI protocol always reads a byte for every byte sent. If you send a
+byte you get a byte. If you do not sent a byte you will never receive a byte since this code operates as an SPI Master. Thus if you only
+wish to receive you must send an equivalent number of bytes. The bytes you send are determined by the Slave. Sometimes this is just
+0x00 and sometimes it represents an address to read - exactly what you, send is entirely slave device implementation dependent. 
+If you only wish to transmit, not receive, just use NULL for your rxBuffer. The SPI port will still receive, of course, but you will
+not be bothered by it.
+<P>
+The Slave Select is set when you opened the port. The rule is one slave to one SPISlaveDeviceHandle.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>ssHandle</i>, The SPI Slave Device handle to write to.
+<DD><i>txByteBuf</i>, The buffer with bytes to write.
+<DD><i>rxByteBuf</i>, The buffer with bytes to receive. Can be NULL.
+<DD><i>numBytes</i>, The number of bytes to send/receive.
+<P>
+</DL>
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public void SetDefaultSpeedInHz(uint spiSpeedInHz)</code>
+<P>
+<DL>Sets the Default SPI speed in Hertz. This value can be overridden on 
+a per slave basis by setting the SpeedInHz in the SPISlaveDeviceHandle</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>spiSpeedInHz</i>, The speed in Hertz to set.
+<P>
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public void SetMode(SPIModeEnum spiMode)</code>
+<P>
+<DL>Sets the SPI mode. This is used for all Slave Devices on the port
+It cannot be individually set on a per slave basis. At least one
+non-GPIO slave must be enabled</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>spiMode</i>, The spi mode to set.
+<P>
+</DL>
+<P>
+
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Properties</h3>
+<DL>
+<code>public SPIPortEnum SPIPort { get; }</code>
+<P>
+<DL>Gets the SPI Port. There is no Set accessor this is set in the constructor</DL>
+<P>
+<DL>
+<DT>value
+<DD>The working SPIPortEnum.
+</DL>
+<P>
+&nbsp;
+
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_SPIPortEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_SPISlaveDeviceHandle.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

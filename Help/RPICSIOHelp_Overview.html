@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: Overview</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Input/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO<BR>A C# I/O Library for the Raspberry Pi</h2></center>
+<center><h1>Overview</h1></center>
+<P> 
+<div class="navbar">&lt;&lt;  Back  
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+||  Next  &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="Overview"></A>
+<h3>About RPICSIO</h3>
+<P>
+RPICSIO is a free and open source .NET v4 library which provides a comprehensive C#  input/output solution for the Raspberry Pi 2 Mono environment.
+Using RPICSIO, you can easily read and write to the GPIO pins (and trigger interrupt events from state changes) and 
+control SPI, I2C, PWM and UART devices. RPICSIO is intended to be a comprehensive solution for I/O on the Raspberry Pi 2. At the current time support for the Raspberry Pi 3 and Raspberry Pi 0 <a href="http://www.ofitselfso.com/RPICSIO/RPICSIOKnownBugsAndToDoList.txt" title="The RPICSIO Known Bugs and ToDo List">remains to be implemented</a>. Besides the downloadable 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download" title="Download the RPICSIO Library">DLL library</a> and 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/RPICSIO.csproj.html" title="The Complete RPICSIO Source Code">source code</a> 
+the RPICSIO contains complete 
+<a href="http://www.ofitselfso.com/RPICSIO/Help/RPICSIOHelp_TableOfContents.html" title="The RPICSIO Help Files">Help Files</a> 
+and 
+<a href="http://www.ofitselfso.com/RPICSIO/Help/RPICSIOHelp_Examples.html" title="Examples of using the RPICSIO Library">Examples</a>
+. 
+<P>
+<font color="red">Note:</font> In order to use the RPICSIO library, C# and Mono must be installed on the Raspberry Pi. A 
+<a href="http://www.OfItselfSo.com/RBerrySharp/RBerrySharp.php#InstallingMonoOnRaspberryPi" title="Series of web pages describing how to install C# and Mono on the Raspberry Pi">separate project</a>
+documents that installation procedure.
+<P>
+<h3>License, Cost and Disclaimer</h3>
+<P>
+The RPICSIO software is free and open source and is released under the <a target=new href="MIT_License.html">MIT License</a>. Be sure to read the 
+license text before you use the software. Your use of the RPICSIO software is entirely at your own risk.
+<P>
+<h3>What RPICSIO Does</h3>
+<P>
+<ul>
+<li>Provides simple and transparent <a href="http://www.ofitselfso.com/RPICSIO/Help/RPICSIOHelp_InputPortExample.html" title="A RPICSIO InputPort Example">read</a>/<a href="http://www.ofitselfso.com/RPICSIO/Help/RPICSIOHelp_OutputPortExample.html" title="A RPICSIO OutputPort Example">write</a> access (including the 
+<a href="RPICSIOHelp_InterruptPortExample.html" title="Triggering Events with the Interrupt Port Class">triggering of events</a>) 
+to the GPIO pins of a Raspberry Pi. A maximum output frequency of about 2.4MHz (yes, mega Hz) is possible when using a memory mapped port class and about 1 Khz when using the SYSFS class.
+<LI>The <a href="http://www.ofitselfso.com/RPICSIO/Help/RPICSIOHelp_SPIPortExample.html" title="A RPICSIO SPI Port Example">SPI</a> port is fully supported. It is possible to use GPIO pins to provide a large number of SPI device select lines.
+<LI>The <a href="http://www.ofitselfso.com/RPICSIO/Help/RPICSIOHelp_I2CPortExample.html" title="A RPICSIO I2C Port Example">I2C</a> port is fully supported.
+<LI>The <a href="http://www.ofitselfso.com/RPICSIO/Help/RPICSIOHelp_SerialPortExample.html" title="A RPICSIO Serial Port Example">Serial/UART</a> port is fully supported.
+<LI>The <a href="http://www.ofitselfso.com/RPICSIO/Help/RPICSIOHelp_PWMPortExample.html" title="A RPICSIO Pulse Width Modulation Example">Pulse Width Modulation</a> (PWM) device is fully supported. The PWM duty
+cycle can be specified in nano-seconds or as a percentage of the base frequency.
+<li>Developed on Raspbian Linux v4.4.32 <a href="https://www.raspberrypi.org/downloads/raspbian/" title="The Raspbian Download Website">freely available</a> for the Raspberry Pi.
+<li>Tested with the Mono JIT compiler v3.2.8 but is probably also compatible with other versions.
+<li>The software is written in C# and a .NET project is included with the source code.
+</ul>
+<P>
+<h3>What RPICSIO Does Not Do</h3>
+<P>
+<ul>
+<li>The Raspbian Debian Linux running on the Raspberry Pi 2 is not a real-time operating system. This means, for example, although you might set a port 
+to output a 100Khz square wave the actual timing of some of the pulses may vary (and there may be gaps) as the process is pre-emptively swapped in and out by the kernel.
+<li>The SPI, I2C, PWM, and UART devices are all supported as of version 01.00.
+<li>The RPICSIO Library cannot do much in the way of I/O unless the process it is running in has root privileges. This is enforced by the Linux O/S and means 
+that any code which incorporates the RPICSIO Library must run as root.
+<LI>The RPICSIO Library does not adjust the PinMux in order to enable devices which may be available on the chip but which are not available by default. 
+Having said that, it will set the GPIO pins to an input or output state (as appropriate) and can also enable or disable the pull-up/pull-down resistors.
+<li>The <a href="RPICSIOHelp_InterruptPortExample.html">InterruptPort</a> functionality is a pseudo interrupt. It operates by monitoring the designated GPIOs out of band in a separate, continuously computable, 
+thread. In concept, it is not dissimilar to the C <code>Poll()</code> call.
+</ul>
+<P>
+<h3>Download</h3>
+<P>
+The latest version of the RPICSIO software can be found on <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">this page</a>. The source
+code is also available in <a href="http://www.ofitselfso.com/RPICSIO/Source/RPICSIO.csproj.html">browseable form</a>.
+<P>
+
+<h3>Installation and System Requirements</h3>
+<P>
+If you download only the <code>RPICSIO.dll</code> (rather than the source) you can use it like any other .NET dll library. Either place the <code>RPICSIO.dll</code> in the same directory 
+as the exe file or copy the dll into the <code>/usr/lib</code> directory where it will be available to all programs that need it. Of course, you will need to
+reference it in the .NET solution just as you would any other library.
+<P>
+If you download the source code you can include the <code>RPICSIO.proj</code> into your .NET solution in the usual way and the software should compile.
+<P>
+As for system requirements, the RPICSIO was tested on a Raspberry Pi 2 model B rev 1.1 board with the standard Raspbian Debian Linux v4.4.32 operating system installed. You will also
+need <a href="http://www.ofitselfso.com/RBerrySharp/RBerrySharp.php" title="Installing Mono and C# on the Raspberry Pi">Mono and the MCS compiler</a> - testing occurred on Mono 3.2.8. 
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt;  Back  
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+||  Next  &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

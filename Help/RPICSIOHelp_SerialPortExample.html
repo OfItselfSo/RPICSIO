@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: Serial Port Example Code</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Serial Port Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>Serial Port Example Code</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="SerialPort Example Code"></A>
+<h2>About the Serial Port Class</h2>
+<P>
+The Serial Port class writes to and reads from the UART On Chip Peripheral (OCP) device integrated into the Raspberry Pi 2 CPU. In the Linux operating system there are two ways of accessing the UART OCP device; the first, called TTY, is the 
+standard and approved Linux technique. TTY is a device driver and if the existence of the serial port is detected during boot time,
+the device driver interface will be exposed as a file in the <code>/dev</code> directory of the Raspberry Pi 2 file system. The
+serial ports will only be detected if that port is appropriately configured. 
+<P>
+The second type of access is called Memory Mapped access and this treats the Raspberry Pi's RAM memory as if it were a file. The UART is manipulated as if
+it were a bit at an offset in a virtual file. The RPICSIO library does not, at this time, provide a class which utilizes Memory Mapped access
+to the serial port - the file system based TTY class named <a href="RPICSIOHelp_SerialPortFS.html">SerialPortFS</a> is the only one available.
+<P>
+There is one usable serial port on a Raspberry Pi. If this port has been correctly configured (enable it using <code>raspi-config</code>), the TTY device driver for that port will be accessible via a file in the <code>/dev</code> directory. This file will have a name in the format <code>ttyAMA&lt;Serial Port&gt;</code> where <code>&lt;Serial Port&gt</code> is the number of the serial port. Thus the file <code>/dev/ttyAMA0</code> is the interface for the TTY device driver on serial port 0. If you do not see the <code>ttyAMA*</code> file in the <code>/dev</code> directory this means that the serial device is not correctly. By the way, these files are the sort of files you can open and read and write text from (like you can do with the SYSFS GPIO subsystem) in order to read and write data to the serial port. A command like ... 
+<pre>
+cat /dev/tty04
+</pre> 
+... will continuously output all received data from the port. However reading and writing in this way is not too useful as you cannot easily set any of the serial port parameters (baudrate, parity etc.). In practice, the ttyAMA files are best treated as true device files and if you want them to do anything 
+you have to use an <code>ioctl()</code> call.
+<P>
+<a name="EnablingTheSerialPort"></a> 
+<h2>Enabling the Serial Port</h2>
+<P>
+There is one critical issue to be aware of when using the RPi's serial port. By default the Raspbian operating system, (at the time this documentation was written), configures the AMA0 serial port to operate with the Console serial port driver. This means that even though you may be sending information out the serial port, it will not appear on the appropriate header pins. You need to disable the Console serial port driver first. This is done by running the following commands before using the serial port:
+<pre>
+sudo systemctl stop serial-getty@ttyAMA0.service
+sudo systemctl disable serial-getty@ttyAMA0.service
+</pre>
+<P>
+<h2>Warnings - READ THIS!!!</h2>
+<P>
+The pins (including the serial port pins) on the Raspberry Pi are 3.3Volt. You CANNOT connect them up to a 5V serial device without level shifting the voltage or you will burn out the RPI. You DEFINITELY CANNOT connect them to the +/- 18V of a true RS232 serial port (on the back of a PC) because your RPI will instantly die.
+<P>
+The serial port used in the examples below is ttyAMA0 - this must be configured in order for it to be available for use. Typically this is done using <code>raspi-config</code> to enable it and by disabling the Console serial port driver as discussed above.
+<P>             
+The <a href="http://www.ofitselfso.com/RBerrySharp/InstallingRaspbianKernelRaspberryPi.php">Raspbian Linux</a> running on the Raspberry Pi is <font color="red">not a real-time operating system</font>. However, an OCP peripheral such as the serial port has its own internal clock and so, once the information is given to the port, it will be transmitted and received at the configured port speed with no interruptions. However, transfers made via multiple calls to the serial port can, and will, have variable gaps between transmissions as the process is pre-emptively swapped in and out by the kernel.
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+<A name="Example"></A>
+<h2>An Example of the Serial Port Usage</h2>
+<P>
+The code below illustrates how to use the SerialPortFS class to read and write from a serial device (serial port 0 in this case). See the comments in the code below for a simple method to use the UART1 to test out the connection mechanism. 
+<pre>
+        /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        /// &lt;summary&gt;
+        /// Demonstrates the use of a Serial port. Reading and writing both
+        /// binary data (in a byte array) and strings.
+        /// 
+        /// The basic function is to open up the specified serial port
+        /// and to set it to a baud rate of 115200, 1 stop, no parity etc.
+        /// Then the text "Hello World" will be transmitted as a string and then  
+        /// after a slight delay the port will be read as a string.
+        /// 
+        /// Once that is done, a binary array of 3 characters is transmitted 
+        /// and again, after a short delay, any characters on the port are 
+        /// read back and displayed as hex values.
+        ///  
+        /// MEGA IMPORTANT NOTE: The pins (including the serial port pins) on the 
+        ///   Raspberry Pi are 3.3Volt. You CANNOT connect them up to a 5V
+        ///   serial device without level shifting the voltage or you will burn out
+        ///   the RPI. You DEFINITELY CANNOT connect them to the +/- 18V of a true
+        ///   serial port (on the back of a PC) because your RPI will instantly 
+        ///   die.
+        /// 
+        /// NOTE: 
+        ///   Be aware that you need to disable the console serial port driver 
+        ///   otherwise the RPICSIO system calls do not work. Do this by issuing the 
+        ///   commands below (as root) at a shell prompt
+        /// 
+        ///    sudo systemctl stop serial-getty@ttyAMA0.service
+        ///    sudo systemctl disable serial-getty@ttyAMA0.service
+        /// 
+        /// STANDARD NOTE:
+        ///   Be aware that you have to tell RPICSIO what type of Pi you are using. This
+        ///   is done by issuing the call below somewhere before you open any port. It
+        ///   only needs to be done once (replace the '2' with a 3 or 0 as appropriate).
+        /// 
+        ///   RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+        /// 
+        /// SIMPLE Test Harness
+        ///   On my RPI2 I simply shorted pins 8 and 10 on the header
+        ///   these are, respectively, UART0 TX and UART0 RX
+        /// 
+        ///   Once you have done that the code below should work with a call like
+        ///     SerialPortFSTest(SerialPortEnum.UART_AMA);
+        /// 
+        /// Because the pins are both on the RPI we do not have to worry about
+        /// level shifting the voltages etc and can easily see the input and output
+        /// going back and forth.
+        /// 
+        /// &lt;/summary&gt;
+        /// &lt;param name="serialID"&gt;The serial portID&lt;/param&gt;
+        /// &lt;history&gt;
+        ///    01 Dec 16  Cynic - Originally written
+        /// &lt;/history&gt;
+        public void SerialPortFSTest(SerialPortEnum serialID)
+        {
+            int numBytes = 0;
+
+            // byte convByte;
+            int bufLen = 4;
+            byte[] txByteBuf = new byte[bufLen];
+            byte[] rxByteBuf = new byte[bufLen];
+
+            // open the port
+            SerialPortFS serialPort = new SerialPortFS(serialID, SerialPortOpenModeEnum.OPEN_NONBLOCK);
+            if (serialPort.PortIsOpen == false)
+            {
+                throw new Exception("ssHandle == null");
+            }
+
+            // lets flush the queues - just to show we can
+            serialPort.Flush();
+
+            // Dump the current settings
+            Console.WriteLine("");
+            Console.WriteLine("Previous Settings on " + serialID.ToString());
+            Console.WriteLine("BaudRate=" + serialPort.BaudRate.ToString());
+            Console.WriteLine("BitLength=" + serialPort.BitLength.ToString());
+            Console.WriteLine("Parity=" + serialPort.Parity.ToString());
+            Console.WriteLine("StopBits=" + serialPort.StopBits.ToString());
+
+            // set some new settings
+            serialPort.BaudRate = SerialPortBaudRateEnum.BAUDRATE_115200;
+            serialPort.BitLength = SerialPortBitLengthEnum.BITLENGTH_8;
+            serialPort.Parity = SerialPortParityEnum.PARITY_NONE;
+            serialPort.StopBits = SerialPortStopBitsEnum.STOPBITS_ONE;
+
+            // dump the current settings
+            Console.WriteLine("");
+            Console.WriteLine("Current Settings on " + serialID.ToString());
+            Console.WriteLine("BaudRate=" + serialPort.BaudRate.ToString());
+            Console.WriteLine("BitLength=" + serialPort.BitLength.ToString());
+            Console.WriteLine("Parity=" + serialPort.Parity.ToString());
+            Console.WriteLine("StopBits=" + serialPort.StopBits.ToString());
+            Console.WriteLine("SerialData-&gt;"+ serialPort.ReadString(100) + "&lt;-");
+            Console.WriteLine("");
+
+            Console.WriteLine("Now writing the test data");
+            serialPort.Write("Hello World");
+            Thread.Sleep(1000);
+            Console.WriteLine("Now processing the received data..");
+            Console.WriteLine("SerialData-&gt;"+ serialPort.ReadString(100) + "&lt;-");
+
+            Console.WriteLine("");
+            Console.WriteLine("Now writing the test as an array");
+
+            // Write a binary array of data to the UART
+            txByteBuf[0] = 0x41; // an 'A'
+            txByteBuf[1] = 0x13; // CR
+            txByteBuf[2] = 0x10; // LF
+            serialPort.Write(txByteBuf, 3);
+
+            Thread.Sleep(1000);
+
+            // find out how much is waiting
+            numBytes = serialPort.BytesInRxBuffer;
+            Console.WriteLine("There are numBytes="+numBytes.ToString()+" waiting");
+
+            // read the data into our limited size rxByteBuf, note we specify the 
+            // rxByteBuf.Length so we do not over fill
+            int numRead = serialPort.ReadByteArray(rxByteBuf, rxByteBuf.Length);
+
+            // we have the data in the rxByteBuf - display it as hex values
+            Console.Write("Received " + numRead + " bytes, Displaying "+numBytes.ToString() +" as hex values: ");
+            for (int i = 0; i &lt; numBytes; i++)
+            {
+                Console.Write("0x" + rxByteBuf[i].ToString("X2") +" ");
+            }
+            Console.WriteLine("");
+            Console.WriteLine("");
+
+            // close the port
+            serialPort.ClosePort();
+            serialPort.Dispose();
+        }
+</pre> 
+In the above code, the <code>serialID</code> is passed in when the function was called. This value is a member of the 
+<code><a href="RPICSIOHelp_SerialPortEnum.html">SerialPortEnum class</a></code> which lists all possible serial ports which
+can be present on the Raspberry Pi. The above code is called via a line which looks like:
+<pre>
+SerialPortFSTest(SerialPortEnum.UART_AMA);
+</pre> 
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

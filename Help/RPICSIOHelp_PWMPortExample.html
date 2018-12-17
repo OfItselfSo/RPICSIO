@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: PWM Port Example Code</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Input/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono Pulse Width Modulation PWM Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>PWMPort Example Code</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="PWMPort Example Code"></A>
+<h2>About the PWMPort Class</h2>
+<P>
+The PWMPort class controls one of the two Pulse Width Modulation On Chip Peripheral (OCP) outputs integrated into the Raspberry Pi 2 CPU. 
+In the Linux operating system there are two ways of accessing the PWM devices. The first, file system access using device drivers, is the 
+standard and approved Linux technique. If the existence of a PWM port is detected during boot time, the PWM device driver interface will be exposed as files in the <code>/sys/class/pwm</code> directory of the Raspberry Pi file system. The PWM ports will only be detected if that port is appropriately configured.
+<P>
+The second type of access is called Memory Mapped access and this treats the Raspberry Pi's RAM memory as if it were a file. The PWM port is manipulated as if
+it were a bit at an offset in a virtual file. The RPICSIO library does not, at this time, provide a class which utilizes Memory Mapped access
+to the PWM port - the file system based class named <a href="RPICSIOHelp_PWMPortFS.html">PWMPortFS</a> is the only one available.
+<P>
+There are several possible pins on the Raspberry Pi 2 header which could, theoretically, output PWM signals. The actual pin used depends on the options appended to the device tree overlay when it is executed. If you use the device tree overlay configuration as advised below, the default pins will be Pin12 for PWM_0 and Pin35 for PWM_1;
+<P>
+A listing of all PWM Devices and their P8/P9 Headers is given below
+<P>
+<pre>
+        PWM_0,       // output pin depends on dt_overlay
+                     //    GPIO_18, header Pin12 by default
+        PWM_1,       // output pin depends on dt_overlay       
+                     //    GPIO_19, header Pin35 by default
+</pre>
+<P>
+See the comments in the example code below for an explanation of the meaning of the above table.
+<a name="EnablingThePWMPorts"></a> 
+<P>
+<h2>Enabling the PWM Ports</h2>
+<P>
+There is a bit of a problem with the RPi's PWM ports the Raspbian operating system, (at the time this documentation was written), has an incorrect set of device tree overlays for the PWM ports. Theoretically, enabling the PWM ports should be as simple as including either one of the lines below in the <Code>/boot/config.txt</Code> file.
+<pre>
+    # enable one PWM with GPIO_18, header Pin12 by default
+    dtoverlay=pwm.dtbo
+    # enable two PWMs GPIO_18, header Pin12 and GPIO_19, header Pin35 by default
+    dtoverlay=pwm-2chan.dtbo
+</pre>
+Unfortunately, the above lines do not work correctly. These device tree configuration overlays create the proper devices in the <code>/sys/class/pwm</code> directory but they omit to enable a hardware clock deep down in the OCP subsystem. With these overlays, the PWM devices simply will not work and they will not throw an error either. Fortunately, the clever people at JumpNowTek.com have come up with a much better device tree configuration file which does enable the appropriate clock. The source code for the overlays is available for download from this page <a href="http://www.jumpnowtek.com/rpi/Using-the-Raspberry-Pi-Hardware-PWM-timers.html">http://www.jumpnowtek.com/rpi/Using-the-Raspberry-Pi-Hardware-PWM-timers.html</a> and is also included in the RPICSIO source. 
+<P>
+Of course, to use the JumpNowTek device tree overlays you will need to compile them up. This is done with the following series of commands.
+<UL>
+<LI>Step 1: Check <Code>/boot/overlays</Code> for files with names of <Code>pwm-with-clk.dtbo</Code> and <Code>pwm-2chan-with-clk.dtbo</Code>. If you have these you do not need to download or compile anything - skip to Step 5 below.
+<LI>Step 2: Ensure you have a device tree compiler. You can get this by issuing the command <Code>sudo apt-get install device-tree-compiler</Code>. Probably you will already have one as the Raspbian operating system ships with this.
+<LI>Step 3: Download the files from the following pages <a href="https://github.com/jumpnow/meta-rpi/blob/krogoth/recipes-kernel/linux/linux-raspberrypi-4.4/dts/pwm-with-clk-overlay.dts">pwm-with-clk-overlay.dts</a> and <a href="https://github.com/jumpnow/meta-rpi/blob/krogoth/recipes-kernel/linux/linux-raspberrypi-4.4/dts/pwm-2chan-with-clk-overlay.dts">pwm-2chan-with-clk-overlay.dts</a> or dig them out of the RPICSIO source. Be sure to copy them into the <Code>/boot/overlays</Code> directory.
+<LI>Step 4: Compile the overlays with commands like the following
+<pre>
+cd /boot/overlays
+dtc -I dts -O dtb -o pwm-with-clk.dtbo pwm-with-clk-overlay.dts
+dtc -I dts -O dtb -o pwm-2chan-with-clk.dtbo pwm-2chan-with-clk-overlay.dts
+</pre>
+At this point you should be able to confirm that the files <Code>pwm-with-clk.dtbo</Code> and <Code>pwm-2chan-with-clk.dtbo</Code> are present in the <Code>/boot/overlays</Code> directory.<LI>Step 5: Ensure the <Code>/boot/config.txt</Code> file contains one of the lines below.
+<pre>
+    # enable one PWM with GPIO_18, header Pin12 by default
+    dtoverlay=pwm-2chan.dtbo
+    # enable two PWMs GPIO_18, header Pin12 and GPIO_19, header Pin35 by default
+    dtoverlay=pwm-2chan-2chan.dtbo
+</pre>
+<LI>Step 6: Reboot.
+</UL>
+<P>
+Note that there are options available on the device tree overlays to route the PWM signal out to certain other pins on the RPi2's header. These are discussed on the <a href="http://www.jumpnowtek.com/rpi/Using-the-Raspberry-Pi-Hardware-PWM-timers.html">JumpNowTek page</a>, the defaults are as specified above. 
+<P>
+<h2>Warnings - READ THIS!!!</h2>
+<P>
+The PWM port used in the examples below is PWM_0. This signal will, by default, appear on Pin12 of the header (GPIO_18) although it can be routed out to other pins. You will need to check the device tree overlay setup in the <code>/boot/config.txt</code> file in order to confirm the pin being used.
+<P>
+Be aware that if you also use a second <a href="RPICSIOHelp_PWMPortFS.html">PWMPortFS</a> object on PWM_1 (pin35 by default) the frequency of the PWM port must be configured to be identical as they actually share a single internal PWM device. They can, however, have an independent duty cycle. 
+<P>
+Make sure you configure the duty cycle after you set the frequency on the port. The frequency is used to set the proper timings for the duty cycle and the duty cycle is not automatically adjusted if you change the base frequency of the PWM device.
+<P>
+You may also need to disable the audio - it has been rumoured to conflict with the PWM system. This is done by commenting out the line in the <code>config.txt</code> file as shown below:
+<pre>
+    #dtparam=audio=on
+</pre>
+<P>
+The <a href="http://www.ofitselfso.com/RBerrySharp/InstallingRaspbianKernelRaspberryPi.php">Raspbian Linux</a> running on the Raspberry Pi is <font color="red">not a 
+real-time operating system</font>. However, OCP peripherals such as
+the PWM Devices have their own internal clock and so, once the frequency and duty cycle information is given to the port, that waveform will
+maintained with no interruptions. However, the act of making changes to the configuration (the duty cycle - for example) can, and will, have variable timing 
+as the process is pre-emotively swapped in and out by the kernel.
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+<A name="Example"></A>
+<h2>An Example of the PWMPort Usage</h2>
+<P>
+The code below illustrates how to use the PWMPortFS class to configure a PWM device output a variety of duty cycle waveforms. 
+<pre>
+        /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        /// &lt;summary&gt;
+        /// Tests a PWM Port (and presumably a servo attached to that port)
+        /// by changing the pulse width duty cycle to 25%, 50% and 75% and
+        /// back again. Once that is done, the pulse width is changed over the
+        /// same range but much more smoothly. 
+        /// 
+        /// NOTE: 
+        /// Be aware that you need to ensure the PWM port is configured in /boot/config.txt
+        /// before this code will work. This is done by including one of the statements
+        /// 
+        /// dtoverlay=pwm-with-clk
+        /// 
+        /// or
+        /// 
+        /// dtoverlay=pwm-2chan-with-clk 
+        /// 
+        /// You also need to disable the audio (it conflicts with the PWM system) by 
+        /// commenting out the line in the config.txt as shown below
+        /// #dtparam=audio=on
+        /// 
+        /// The pwm-with-clk statement will give you PWM0 on GPIO_18 which is Pin12 on the 
+        /// RPi2 Header. The pwm-2chan-with-clk will give you the same PWM0 but also PWM1
+        /// which will be available on GPIO_19 which is Pin35 on the RPi2 header.
+        /// 
+        /// NOTE: these two overlays do not ship with the default raspbian (at this time)
+        ///       you will need to download them from
+        /// 
+        ///   http://www.jumpnowtek.com/rpi/Using-the-Raspberry-Pi-Hardware-PWM-timers.html
+        ///
+        ///    without these drivers the PWM subsystem will not work. You cannot use the 
+        ///    drivers that ship with the default raspbian. They do not enable an internal
+        ///    clock.
+        /// 
+        /// STANDARD NOTE:
+        ///   Be aware that you have to tell RPICSIO what type of Pi you are using. This
+        ///   is done by issuing the call below somewhere before you open any port. It
+        ///   only needs to be done once (replace the '2' with a 3 or 0 as appropriate).
+        /// 
+        ///   RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+        /// 
+        /// SIMPLE Test Harness
+        ///   Monitor GPIO 18 (pin 12) for the PWM_0 signal.
+        /// 
+        ///   Once you have done that the code below should work with a call like
+        ///     SimpleTestPWM(PWMPortEnum.PWM_0);  
+        ///   if you used pwm-2chan-with-clk you can also use GPIO_19 (pin 35) for PWM_1
+        ///
+        /// &lt;/summary&gt;
+        /// &lt;param name="pwmID"&gt;The a2dID&lt;/param&gt;
+        /// &lt;history&gt;
+        ///    01 Dec  Cynic - Originally written
+        /// &lt;/history&gt;
+        public void SimpleTestPWM(PWMPortEnum pwmID)
+        {
+            const uint DEFAULT_PERIOD_NS = 250000;
+            const uint DEFAULT_DUTY_50PERCENT = (uint)(DEFAULT_PERIOD_NS*(0.5));
+            const uint DEFAULT_DUTY_75PERCENT = (uint)(DEFAULT_PERIOD_NS*(0.75));
+            const uint DEFAULT_DUTY_25PERCENT = (uint)(DEFAULT_PERIOD_NS*(0.25));
+ 
+            // open the port
+            PWMPortFS pwmPort = new PWMPortFS(pwmID);
+
+            // set the PWM waveform period
+            pwmPort.PeriodNS = DEFAULT_PERIOD_NS;
+            // we could also use FrequencyHz which does the same thing
+            // pwmPort.FrequencyHz = 4000;
+
+            // set the PWM waveform Duty Cycle
+            pwmPort.DutyNS = DEFAULT_DUTY_50PERCENT;
+            // we could also use DutyPercent which does the same thing
+            // pwmPort.DutyPercent = 50;
+
+            // set the run state to begin the output of the PWM waveform
+            pwmPort.RunState = true;
+
+            Console.WriteLine("PeriodNS is: " + pwmPort.PeriodNS.ToString());
+            Console.WriteLine("DutyNS is: " + pwmPort.DutyNS.ToString());
+            Console.WriteLine("FrequencyHz is: " + pwmPort.FrequencyHz.ToString());
+            Console.WriteLine("DutyPercent is: " + pwmPort.DutyPercent.ToString());
+            Console.WriteLine("RunState is: " + pwmPort.RunState.ToString());
+
+            // change the PWM duty cycle (i.e. rotate the servo)
+            // until we get a key press on the console
+            while (true)
+            {
+                // first we rotate the servo in steps
+                Console.WriteLine("");
+                Console.WriteLine("Now Step Rotating Servo");
+
+                // set the Duty Cycle low 
+                pwmPort.DutyNS = DEFAULT_DUTY_25PERCENT;
+                if (Console.KeyAvailable == true) break;
+                Console.WriteLine("DutyPercent is: " + pwmPort.DutyPercent.ToString());
+                Thread.Sleep(3000);
+                // set the Duty Cycle midway
+                pwmPort.DutyNS = DEFAULT_DUTY_50PERCENT;
+                if (Console.KeyAvailable == true) break;
+                Console.WriteLine("DutyPercent is: " + pwmPort.DutyPercent.ToString());
+                Thread.Sleep(3000);
+                // set the Duty Cycle high
+                pwmPort.DutyNS = DEFAULT_DUTY_75PERCENT;
+                if (Console.KeyAvailable == true) break;
+                Console.WriteLine("DutyPercent is: " + pwmPort.DutyPercent.ToString());
+                Thread.Sleep(3000);
+                // set the Duty Cycle midway
+                pwmPort.DutyNS = DEFAULT_DUTY_50PERCENT;
+                if (Console.KeyAvailable == true) break;
+                Console.WriteLine("DutyPercent is: " + pwmPort.DutyPercent.ToString());
+                Thread.Sleep(3000);
+
+                Console.WriteLine("");
+                Console.WriteLine("Now Smoothly Rotating Servo");
+
+                // now we rotate the servo smoothly from
+                // 25.123% to 75.456% using a totally arbitrary increment
+                for (double i = 25.123; i &lt; 75.345; i=i+0.678)
+                {
+                    pwmPort.DutyPercent = i;
+                    if (Console.KeyAvailable == true) break;
+                    Console.WriteLine("DutyPercent is: " + pwmPort.DutyPercent.ToString());
+                    Thread.Sleep(250);
+                }
+            }
+            // we are done, stop running
+            pwmPort.RunState = false;
+ 
+            // close the port
+            pwmPort.Dispose();
+        }  
+</pre> 
+In the above code, the <code>pwmID</code> is passed in when the function was called. This value is a member of the 
+<code><a href="RPICSIOHelp_PWMPortEnum.html">PWMPortEnum class</a></code> which lists all possible PWM ports which
+can be present on the Raspberry Pi. The above code is called via a line which looks like:
+<pre>
+SimpleTestPWM(PWMPortEnum.PWM_0);
+</pre> 
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

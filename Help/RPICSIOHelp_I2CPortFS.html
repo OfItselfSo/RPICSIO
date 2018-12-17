@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The I2CPortFS Class</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO i2c I2C Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO i2c I2C Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The I2CPortFS Class</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_I2CPortEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| Next  &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="I2CPort Class"></A>
+<h2>The I2CPortFS Class</h2>
+<P>
+The I2CPort class writes to and reads from the  I2C bus On Chip Peripheral (OCP) device integrated into the Raspberry Pi CPU via the
+I2CDev device driver access method. At this time there is no RPICSIO class of similar functionality which uses the Memory Mapped access method. 
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/I2CPortFS.cs.html">browseable form</a>.
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Example Code</h3>
+<DL>
+Example code which demonstrates the use of this class can be found on the <a href="RPICSIOHelp_I2CPortExample.html">I2C Port Example</a> page.
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<code>public class I2CPortFS : PortFS</code>
+<P>
+<DL>Provides Inter-Integrated Circuit (I2C) port functionality for a Raspberry Pi (I2CDev Version).</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Constructors</h3>
+<DL>
+<P>
+<code>public I2CPortFS(I2CPortEnum i2cPortIn) : base(GpioEnum.GPIO_NONE)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>i2cPortIn - The I2C port to access.
+</DL>
+
+<P>
+&nbsp;
+<P>
+</DL>
+<h3>Public Methods</h3>
+<DL>
+<code>public override void ClosePort()</code>
+<P>
+<DL>Closes the port. Because we do not open the port at the PortFS level
+we cannot close it there either. This overrides the PortFS.ClosePort()
+and does what is necessary internally to close things up.</DL>
+</DL>
+<P>
+&nbsp;
+<P>
+<DL>
+<code>public void Dispose()</code>
+<P>
+<DL>Implements IDisposable. Should be called after the class is closed to release resources.</DL>
+<P>
+&nbsp;
+<P>
+<code>public override PortDirectionEnum PortDirection()</code>
+<P>
+<DL>Gets the PortDirection</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>A <i>PortDirectionEnum</i> value. This value is always <i>PortDirectionEnum.PORTDIR_INPUTOUTPUT</i>.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public void Read(int devID, byte[] rxByteBuf, int numBytes)</code>
+<P>
+<DL>Reads a buffer in from an I2C Device. 
+<P>
+The address of the I2C device is specified by the devID. You do not need to include the address as the first outgoing
+byte in the rxByteBuf or set the READ/WRITE bit in that address. The I2C driver does
+that and sends it for you automatically.
+<P>
+<DL>
+<DT>Parameters
+<DD><i>devID</i>, The I2C Device handle to read from.
+<DD><i>rxByteBuf</i>, The buffer for the received bytes. 
+<DD><i>numBytes</i>, The number of bytes to receive.
+<P>
+</DL>
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public void Write(int devID, byte[] txByteBuf, int numBytes)</code>
+<P>
+<DL>Writes a buffer out to an I2C Device. 
+<P>
+The address of the I2C device is specified by the devID. You do not need to include the address as the first outgoing
+byte in the txByteBuf or set the READ/WRITE bit in that address. The I2C driver does
+that and sends it for you automatically.
+<P>
+<DL>
+<DT>Parameters
+<DD><i>devID</i>, The I2C Device handle to write to.
+<DD><i>txByteBuf</i>, The buffer for the transmitted bytes. 
+<DD><i>numBytes</i>, The number of bytes to send.
+<P>
+</DL>
+</DL>
+<P>
+
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Properties</h3>
+<DL>
+<code>public I2CPortEnum I2CPort { get; }</code>
+<P>
+<DL>Gets the I2C Port. There is no Set accessor this is set in the constructor</DL>
+<P>
+<DL>
+<DT>value
+<DD>The working I2CPortEnum.
+</DL>
+<P>
+&nbsp;
+
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_I2CPortEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| Next  &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

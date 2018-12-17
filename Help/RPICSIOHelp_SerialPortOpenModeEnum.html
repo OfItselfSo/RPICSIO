@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The SerialPortOpenModeEnum Enum</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Input/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The SerialPortOpenModeEnum Enum</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_SerialPortFS.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_SerialPortParityEnum.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="SerialPortOpenModeEnum Enum"></A>
+<h2>The SerialPortOpenModeEnum Enum</h2>
+<P>
+The SerialPortOpenModeEnum enum defines possible read modes of a serial port on the Raspberry Pi. 
+<P>
+Blocking refers to to the way the serial port code deals with a request to read more data than is present in the input queue. If the port is in block mode and more data is requested than is present, then the call will wait until the required amount of data arrives. In OPEN_NONBLOCK mode the port will just return what it has.
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/SerialPortOpenModeEnum.cs.html">browseable form</a>.
+<P>
+</DL>
+
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<pre>
+    public enum SerialPortOpenModeEnum
+    {
+        OPEN_BLOCK,       // reads block (wait) 
+        OPEN_NONBLOCK     // reads do not block
+    }
+</pre>
+</DL>
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_SPIModeEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_SPIPortFS.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

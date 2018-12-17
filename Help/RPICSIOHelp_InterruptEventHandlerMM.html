@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The InterruptEventHandlerMM Class</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Input/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The InterruptEventHandlerMM Class</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_InputPortMM.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_InterruptMode.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="InterruptEventHandlerMM Delegate"></A>
+<h2>The InterruptEventHandlerMM Delegate</h2>
+<P>
+The InterruptEventHandlerMM delegate defines the data contract which is used to send event information to the objects which subscribe to an 
+<a href="RPICSIOHelp_InterruptPortMM.html">InterruptPort</a>'s OnInterrupt event. 
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/InterruptEventHandlerMM.cs.html">browseable form</a>.
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<pre>
+public delegate void InterruptEventHandlerMM(GpioEnum evGpio, bool evState, DateTime evDateTime, EventData evData);
+</pre>
+</DL>
+<P>
+&nbsp;
+<P>
+<h3>Example Code</h3>
+<DL>
+Example code which demonstrates the use of this delegate can be found on the <a href="RPICSIOHelp_InterruptPortExample.html">Interrupt Port Example</a> page.
+</DL>
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_InputPortMM.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_InterruptMode.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

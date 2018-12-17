@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The EventData Class</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Output/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The EventData Class</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; Back  
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_FSPortDirectionEnum.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="EventData Class"></A>
+<h2>The EventData Class</h2>
+<P>
+The EventData class provides a container to transport event data. An instantiated object of this class is created by an
+ <a href="RPICSIOHelp_InterruptPortMM.html">InteruptPortMM</a> class for every 
+OnInterrupt triggered and is passed as a parameter in the <a href="RPICSIOHelp_InterruptEventHandlerMM.html">InterruptEventHandlerMM</a> delegate
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/EventData.cs.html">browseable form</a>.
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Example Code</h3>
+<DL>
+Example code which demonstrates the use of this class can be found on the <a href="RPICSIOHelp_InterruptPortExample.html">Interrupt Port Example</a> page.
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<code>public class EventData</code>
+<P>
+<DL>A class to encapsulate event data.</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Constructors</h3>
+<DL>
+<P>
+<code>public EventData(<a href="RPICSIOHelp_InterruptPortMM.html">InterruptPortMM</a> portObjectIn)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>portObjectIn - The InterruptPortMM object which is sending this event.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public EventData(<a href="RPICSIOHelp_InterruptPortMM.html">InterruptPortMM</a> portObjectIn, int evCodeIn, uint evValueIn) </code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>portObjectIn - The InterruptPortMM object which is sending this event.
+<DD>evCodeIn - A user specified code which appears in the events.
+<DD>evValueIn - The current state of the pin 0 or 1 (low or high).
+</DL>
+
+<P>
+&nbsp;
+<P>
+</DL>
+<h3>Public Methods</h3>
+<DL>
+<code>public override string ToString()</code>
+<P>
+<DL>Outputs the event data as a nice human readable string. An example would be
+<P><code>GPIO=GPIO_4, date=2014-11-30 15:22:56.45677, evCode=00A4, evValue=1</code>
+</DL>
+</DL>
+
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Properties</h3>
+<DL>
+<code>public int EvCode { get; }</code>
+<P>
+<DL>Gets the event code. This is a user defined value specified when 
+the interrupt port was created. There is no set accessor - this value is set in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The user-defined identification code for this event.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public DateTime EventDateTime { get; }</code>
+<P>
+<DL>Gets the event date time. Will never return null. There is no set
+accessor. The event dateTime is set when the event is created.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The datetime value when the event was created.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public <a href="RPICSIOHelp_GPIOEnum.html">GpioEnum</a> EvGPIO { get; }</code>
+<P>
+<DL>Gets the event GPIO. There is no set accessor - this value is derived from the PortObject.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The gpioID of the InterruptPortMM object that generated this event.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int EvMSec { get; }</code>
+<P>
+<DL>Gets the milli-seconds value of the event. There is no set accessor - this value is derived from the EventDateTime.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The milli-seconds value of the date and time this event was generated.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int EvSec { get; }</code>
+<P>
+<DL>Gets the seconds value of the event. There is no set accessor - this value is derived from the EventDateTime </DL>
+<P>
+<DL>
+<DT>value
+<DD>The seconds value of the date and time this event was generated.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public bool EvState { get; }</code>
+<P>
+<DL>Gets the event boolean state. This is false if EvValue is zero otherwise true</DL>
+<P>
+<DL>
+<DT>value
+<DD>true the EvValue is non-zero, false it is zero.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public long EvTicks { get; }</code>
+<P>
+<DL>Gets the ticks value of the event.. There is no set accessor - this value is derived from the EventDateTime.
+A tick is 100 nano seconds or 0.1 micro sec.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The number of ticks of the date and time this event was generated.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int EvUSec { get; }</code>
+<P>
+<DL>Gets the micro-seconds value of the event. There is no set accessor - this value is derived from the EventDateTime.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The micro-seconds value of the date and time this event was generated.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public uint EvValue { get; }</code>
+<P>
+<DL>Gets the event value. This will be 0 for pin is now low, 1 for pin is now high.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The state of the pin when the interrupt was generated.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public <a href="RPICSIOHelp_InterruptPortMM.html">InterruptPortMM</a> PortObject { get; set; }</code>
+<P>
+<DL>Gets/Sets the port object which generated this event.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The InterruptPortMM object that generated this event.
+</DL>
+<P>
+&nbsp;
+<P>
+
+
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; Back  
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_FSPortDirectionEnum.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

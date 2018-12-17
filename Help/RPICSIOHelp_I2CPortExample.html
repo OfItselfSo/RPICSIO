@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: I2C Port Example Code</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO I2C/I2C Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>I2CPort Example Code</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="I2CPort Example Code"></A>
+<h2>About the I2CPort Class</h2>
+<P>
+The I2CPort class writes to and reads from the I2C bus On Chip Peripheral (OCP) device integrated into the Raspberry Pi 2 CPU. 
+In the Linux operating system there are two ways of accessing the I2C devices; the first, called I2CDev, is the 
+standard and approved Linux technique. I2CDev is a device driver and if the existence of a I2C port is detected during boot time,
+the device driver interface will be exposed as a file in the <code>/dev</code> directory of the Raspberry Pi file system. The
+I2C ports will only be detected if that port is appropriately configured. 
+<P>
+The second type of access is called Memory Mapped access and this treats the Raspberry Pi's RAM memory as if it were a file. The I2C port is manipulated as if
+it were a bit at an offset in a virtual file. The RPICSIO library does not, at this time, provide a class which utilizes Memory Mapped access
+to the I2C port - the file system based I2CDev class named <a href="RPICSIOHelp_I2CPortFS.html">I2CPortFS</a> is the only one available.
+<P>
+There is one I2C port available by default on a Raspberry Pi 2. The I2C device will need to be enabled before it can be used and this is done using the <a href="https://www.raspberrypi.org/documentation/configuration/raspi-config.md">raspi-config</a> utility. If this port has been correctly configured, the I2CDev device driver for that port will be accessible
+via a file in the <code>/dev</code> directory. This file will have a name in the format <code>i2cdev_&lt;i2cport&gt;</code> where <code>&lt;i2cport&gt</code> is
+the number of the I2C port. Thus the file <code>/dev/i2cdev_1</code> is the interface for the I2CDev device driver on I2C port 1. If you do not see the <code>i2cdev_*</code> file
+in the <code>/dev</code> directory this means that the I2C device is not correctly enabled. By the way, these files are not the sort of files you
+can open and write text to in order control the port (like you do with the SYSFS GPIO subsystem). The <code>i2cdev</code> files are true device files and if you want them to do anything 
+you have to use an <code>ioctl()</code> call.
+<P>
+Each device on an <a href="http://en.wikipedia.org/wiki/I2C">I2C bus</a> has its own address called the device address and the Raspberry Pi functions as the I2C bus master.
+You should use the free <a href="http://elinux.org/Interfacing_with_I2C_Devices#i2c-tools">i2c-tools</a> package to probe the Raspberry Pi for all available I2C ports and also to 
+probe for the addresses of the devices addresses connected to a particular I2C port. The use of the i2c-tools will not be discussed here - however Adafruit 
+has posted a <a href="https://learn.adafruit.com/adafruits-raspberry-pi-lesson-4-gpio-setup/configuring-i2c">useful page</a> which, in part, covers that subject.
+<P>
+<h2>Warnings - READ THIS!!!</h2>
+<P>
+The I2C port used in the examples below is I2C1 - this must be configured in order for it to be available for use. 
+<P>
+The <a href="https://www.raspberrypi.org/downloads/raspbian/">Raspbian Linux</a> running on the Raspberry Pi is <font color="red">not a real-time operating system</font>. However, an OCP peripheral such as
+the I2CPort has its own internal clock and so, once the information is given to the port, it will be transmitted and received
+at the configured port speed with no interruptions. However, transfers made via multiple calls to the I2C port can, and will, have variable gaps 
+between transmissions as the process is pre-emptively swapped in and out by the kernel.
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+<A name="Example"></A>
+<h2>An Example of the I2CPort Usage</h2>
+<P>
+The code below illustrates how to use the I2CPortFS class to read from an I2C device (an ADC) and then write that value to another I2C device (an 4x7 Segment display) on the same I2C bus. 
+<pre>
+        /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        /// &lt;summary&gt;
+        /// Writes to and reads from an I2C port - I2CDev version. The example code
+        /// assumes there are two I2C devices on the bus. A Sparkfun Serial 7 
+        /// Segment Display on I2C address 0x71 and an AdaFruit 12-Bit 4 Channel ADC
+        /// with Programmable Gain Amplifier on I2C address 0x48.
+        /// 
+        /// NOTE: 
+        ///   The address of the device is specified in the i2cPort.Write or
+        ///   i2cPort.Read calls. You do not need to send that as the first outgoing
+        ///   byte or set the READ/WRITE bit in that address. The I2C driver does
+        ///   that for you automatically.
+        /// 
+        /// NOTE:
+        ///    Make sure you are aware of how I2C buses work and properly
+        ///    configure the SCL and SDA lines.
+        /// 
+        /// NOTE that you can use the i2c-tools package to probe the RPi for all available
+        ///   I2C ports and also to probe for the addresses of the devices addresses
+        ///   connected to a particular I2C port.
+        /// 
+        /// STANDARD NOTE:
+        ///   Be aware that you have to tell RPICSIO what type of Pi you are using. This
+        ///   is done by issuing the call below somewhere before you open any port. It
+        ///   only needs to be done once (replace the '2' with a 3 or 0 as appropriate).
+        /// 
+        ///   RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+        /// 
+        /// SIMPLE Test Harness
+        ///   Hook up your device SDA and SCL lines to pins 3 and 5 of the RPi2 
+        ///   header. Then use i2c-tools to find the address
+        ///      i.e.   i2cdetect -y 1
+        /// 
+        ///   Once you have done use the discovered addresses to update the I2CPortFSTest code 
+        ///     and then it can be called with something like
+        ///        I2CPortFSTest(I2CPortEnum.I2CPORT_1);
+        ///
+        /// &lt;/summary&gt;
+        /// &lt;param name="i2cID"&gt;The i2c portID&lt;/param&gt;
+        /// &lt;history&gt;
+        ///    01 Dec 16  Cynic - Originally written
+        /// &lt;/history&gt;
+        public void I2CPortFSTest(I2CPortEnum i2cID)
+        {
+            byte convByte;
+            int bufLen = 4;
+            byte[] txByteBuf = new byte[bufLen];
+            byte[] rxByteBuf = new byte[bufLen];
+
+            // open the port
+            I2CPortFS i2cPort = new I2CPortFS(i2cID);
+            if (i2cPort.PortIsOpen == false)
+            {
+                throw new Exception("ssHandle == null");
+            }
+
+            // read the A0 register from the 4 channel ADS1015 chip on the
+            // AdaFruit 12-Bit ADC - 4 Channel with Programmable Gain Amplifier.
+            // The codes below are straight out of the example on page 8 of the
+            // ADS1015 datasheet. This, by default, sets things up as a differential
+            // measurement between A0 and A1 so make sure A1 is grounded. Otherwise
+            // change the line txByteBuf[1] value to txByteBuf[1] = 0x44; to make it
+            // non- differential
+
+            // Write to the Config Register to set things up
+            txByteBuf[0] = 0x01;
+            txByteBuf[1] = 0x04; // either ground A1 or change this to 0x44
+            txByteBuf[2] = 0x83;
+            i2cPort.Write(0x48, txByteBuf, 3);
+
+            // Write to the Pointer Register, so we read from A0 in the next step
+            txByteBuf[0] = 0x00;
+            i2cPort.Write(0x48, txByteBuf, 1);
+
+            // Read two bytes from the Conversion Register
+            rxByteBuf[0] = 0x00;
+            rxByteBuf[1] = 0x00;
+            i2cPort.Read(0x48, rxByteBuf, 2);
+
+            // we now have two hex bytes which contain the 12 bit value of
+            // the voltage on input A0, convert them from twos complement and
+            // shift according to the datasheet
+            int a0ADCReading = (((int)(256 * rxByteBuf[0]) + (int)rxByteBuf[1])&gt;&gt;4);
+            Console.WriteLine("ADC Value on A0=" + a0ADCReading.ToString("x4")); 
+
+            // now populate the tx Register with the hex equivalents of the bytes
+            // so we can display them
+            txByteBuf[0] = 0x30; // always zero, the ADC is 12 bits
+            convByte = (byte)((a0ADCReading & 0x00000f00) &gt;&gt; 8);
+            txByteBuf[1] = (byte)(convByte&lt;10 ? convByte + 0x30 : convByte-10 + 0x41);
+            convByte = (byte)((a0ADCReading & 0x000000f0) &gt;&gt; 4);
+            txByteBuf[2] = (byte)(convByte&lt;10 ? convByte + 0x30 : convByte-10 + 0x41);
+            convByte = (byte)((a0ADCReading & 0x0000000f) &gt;&gt; 0);
+            txByteBuf[3] = (byte)(convByte&lt;10 ? convByte + 0x30 : convByte-10 + 0x41);
+
+            Console.WriteLine("Display Hex =" + " 0x" + txByteBuf[0].ToString("x2") + " 0x" + txByteBuf[1].ToString("x2") + " 0x" + txByteBuf[2].ToString("x2") + " 0x" + txByteBuf[3].ToString("x2"));
+
+            // write to the Sparkfun 7 segment display at I2C address 0x71
+            i2cPort.Write(0x71, txByteBuf, 4);
+
+            // close the port
+            i2cPort.ClosePort();
+            i2cPort.Dispose();
+        }
+</pre> 
+In the above code, the <code>i2cID</code> is passed in when the function was called. This value is a member of the 
+<code><a href="RPICSIOHelp_I2CPortEnum.html">I2CPortEnum class</a></code> which lists all possible I2C ports which
+can be present on the Raspberry Pi. The above code is called via a line which looks like:
+<pre>
+I2CPortFSTest(I2CPortEnum.I2CPORT_1);
+</pre> 
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

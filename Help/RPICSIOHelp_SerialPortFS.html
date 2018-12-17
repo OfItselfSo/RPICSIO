@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The SerialPortFS Class</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# Input/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono Pulse Width Modulation PWM Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The SerialPortFS Class</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_SerialPortEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <a href="RPICSIOHelp_SerialPortOpenModeEnum.html">Next</a>  &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="SerialPort Class"></A>
+<h2>The SerialPortFS Class</h2>
+<P>
+Provides the Serial Port functionality for a Raspberry Pi. This is the SYSFS version
+<P>
+<P>
+Note that by default the default Raspian operating system (at the time of writing this documentation) uses serial port AMA0 for the Console serial port. You will need to disable this functionality before you can use the serial port. See the notes on the <a href="RPICSIOHelp_SerialPortExample.html#EnablingTheSerialPort">Serial Port Example</a> page for more information.
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+Be aware that you need to ensure the Serial port is configured (using <code>raspi-config</code> before this port will work. 
+<P>
+<font color="red">VERY IMPORTANT NOTE:</font>
+The pins (including the serial port pins) on the Raspberry Pi are 3.3Volt. You CANNOT connect them up to a 5V serial device without level shifting the voltage or you will burn out the RPI. You DEFINITELY CANNOT connect them to the +/- 18V of a true RS232 serial port (on the back of a PC) because your RPI will instantly die.
+  
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/SerialPortFS.cs.html">browseable form</a>.
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Example Code</h3>
+<DL>
+Example code which demonstrates the use of this class can be found on the <a href="RPICSIOHelp_SerialPortExample.html">Serial Port Example</a> page.
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<code>public class SerialPortFS : PortFS</code>
+<P>
+<DL>Provides the Serial Port functionality for a Raspberry Pi. (SYSFS version)</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Constructors</h3>
+<DL>
+<P>
+<code>public SerialPortFS(SerialPortEnum serialPortIn, SerialPortOpenModeEnum openMode) : base(GpioEnum.GPIO_NONE)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>serialPortIn - The serial port to use.
+<DD>openMode - the read mode (BLOCK or NONBLOCK) in which we open the serial port.
+<P>
+The blocking mode refers to to the way the serial port code deals with a request to read more data than is present in the input queue. If the port is in OPEN_BLOCK mode and more data is requested than is present then the call will wait until the required amount of data arrives. In OPEN_NONBLOCK mode the port will just return what it has.
+</DL>
+
+<P>
+&nbsp;
+<P>
+</DL>
+<h3>Public Methods</h3>
+
+<DL>
+<code>public void Break()</code>
+<P>
+<DL>Removes all data from the Rx and Tx queues. The equivalent of the termios.c tcflush call</DL>
+<P>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public override void ClosePort()</code>
+<P>
+<DL>Closes the port.</DL>
+<P>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public void DumpTermiosStruct(TermiosStruct xfer)</code>
+<P>
+<DL>Dumps out the Termios structure to the console. For diagnostic purposes only.</DL>
+<P>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public void Dispose()</code>
+<P>
+<DL>Implements IDisposable. Should be called after the class is closed to release resources.</DL>
+<P>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public void Flush()</code>
+<P>
+<DL>Removes all data from the Rx and Tx queues. The equivalent of the termios.c tcflush call</DL>
+<P>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public TermiosStruct GetTermiosState()</code>
+<P>
+<DL>Gets the Termios structure. The equivalent of the termios.c tcgetattr call</DL>
+<P>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public override PortDirectionEnum PortDirection()</code>
+<P>
+<DL>Gets the PortDirection</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>A <i>PortDirectionEnum</i> value. This value is always <i>PortDirectionEnum.PORTDIR_OUTPUT</i>.</DL>
+<P>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public int ReadByteArray(byte[] rxByteBuf, int numBytes)</code>
+<P>
+<DL>Reads a buffer in from an Serial Device. We choose to structure this so that the caller passes in the byte array. This allows it to be re-used. If we just create and return one here then C# will have to deal with a lot of garbage collection (potentially) on very busy calls which would slow things down.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>rxByteBuf</i>, The buffer in which we store the bytes read.
+<DD><i>numBytes</i>, The max number of bytes to read.
+</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>The number of bytes read.
+</DL>
+</DL>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public string ReadString(int maxBytes)</code>
+<P>
+<DL>Reads a Serial Device and returns the contents as a string. This is
+not especially efficient in terms of memory use as both the return
+string and an intermediate byte[] array need to be created and
+subsequently garbage collected.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>numBytes</i>, The max number of bytes to read.
+</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>a string with the contents of the serial port receive
+buffer up to the specified maxBytes. If nothing is ready to be
+read on the serial port an empty string will be returned.
+</DL>
+</DL>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public void SetTermiosState(ref TermiosStruct xfer)</code>
+<P>
+<DL>Sets the Termios structure. The equivalent of the termios.c 
+tcsetattr call.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>xfer</i>, The termios structure to set.
+</DL>
+<P>
+</DL>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public void Write(byte[] txByteBuf, int numBytes)</code>
+<P>
+<DL>Writes a byte array out to an Serial Device.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>txByteBuf</i>, The byte array buffer with bytes to write.
+<DD><i>numBytes</i>, The number of bytes to send
+</DL>
+<P>
+</DL>
+&nbsp;
+</DL>
+<P>
+
+<DL>
+<code>public void Write(string outStr)</code>
+<P>
+<DL>Writes a string out to an Serial Device as a series of ASCII bytes.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>outStr</i>, The string to write.
+</DL>
+<P>
+</DL>
+&nbsp;
+</DL>
+<P>
+
+
+<h3>Public Properties</h3>
+
+<DL>
+<code>public SerialPortBaudRateEnum BaudRate { get; set; }</code>
+<P>
+<DL>Gets/Sets the baud rate</DL>
+<P>
+<DL>
+<DT>value
+<DD>A SerialPortBaudRateEnum value.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public SerialPortBitLengthEnum BitLength { get; set; }</code>
+<P>
+<DL>Gets/Sets the bit length of the bytes transmitted via the RPI Serial port</DL>
+<P>
+<DL>
+<DT>value
+<DD>A SerialPortBitLengthEnum value.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public int BytesInRxBuffer { get; }</code>
+<P>
+<DL>Gets the number of pending (unread) bytes in the read buffer of the 
+UART.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The number of pending (unread) bytes.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public SerialPortParityEnum Parity { get; set; }</code>
+<P>
+<DL>Gets/Sets the parity bits of the bytes transmitted via the RPI Serial port</DL>
+<P>
+<DL>
+<DT>value
+<DD>A SerialPortParityEnum value.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public SerialPortEnum SerialPort { get; }</code>
+<P>
+<DL>Gets the Serial Port. There is no Set accessor this is set in the constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>A SerialPortEnum value.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public SerialPortStopBitsEnum StopBits { get; set; }</code>
+<P>
+<DL>Gets/Sets the stop bit setting of the bytes transmitted via the RPI Serial port</DL>
+<P>
+<DL>
+<DT>value
+<DD>A SerialPortStopBitsEnum value.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_SerialPortEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| Next  &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The GpioEnum Enum</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Input/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The GpioEnum Enum</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_GpioConfig.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_GPIOPinMuxModeEnum.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="GpioEnum Enum"></A>
+<h2>The GpioEnum Enum</h2>
+<P>
+The GpioEnum enum only defines the GPIOs available by default on the Raspberry Pi 2's header. There are others, not defined, which are not exposed on the header and hence cannot be used and still others which are only available by disabling some other device (I2C, SPI, UART etc) and changing the pinmux setting. 
+<P>
+The GPIOs are not exposed on the header in any particularly logical order. You must refer to the Raspberry Pi 
+<a href="http://www.OfItselfSo.com/RPINotes/RaspberryPi_HeaderPinouts.php">header pinout</a> in order to 
+determine on which pin the GPIO appears. In particular, be aware that because it says GPIO_4 this does <b>not</b> mean it appears on pin 4 on the header. This is almost never the case and, in fact, GPIO_4 actually appears on pin 7 of the header on the Raspberry Pi 2.
+<P>
+&nbsp;
+<P>
+<h3>Warnings - READ THIS!!!</h3>
+<P>
+The source code below lists the default GPIO values. In general you can assume that, by default, any particular GPIO is available for use 
+on your Raspberry Pi. The RPICSIO library will correctly set these GPIOs to input or output depending on the type of port class you define 
+to operate on it. Having said that, it is possible that the GPIOs could be redirected in the pinmux and hence be unavailable. This would take
+some custom work with the Device Tree and if you are doing that then you will probably be aware of why the GPIO is unavailable.
+<P>
+So, the upshot here is that any GPIO you see defined here should be available for use on the Raspberry Pi 2 for input or output.
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/GpioEnum.cs.html">browseable form</a>.
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<pre>
+    public enum GpioEnum
+    {
+        GPIO_NONE,
+        GPIO_4,
+        GPIO_5,
+        GPIO_6,
+        GPIO_12,
+        GPIO_13,
+        GPIO_16,
+        GPIO_17,
+        GPIO_18,
+        GPIO_19,
+        GPIO_20,
+        GPIO_21,
+        GPIO_22,
+        GPIO_23,
+        GPIO_24,
+        GPIO_25,
+        GPIO_26,
+        GPIO_27
+    }
+</pre>
+</DL>
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_GpioConfig.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_GPIOPinMuxModeEnum.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

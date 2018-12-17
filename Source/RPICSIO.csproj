@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{C2E3FD44-8B43-4F80-A27F-4B4E8B159D88}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>RPICSIO</RootNamespace>
+    <AssemblyName>RPICSIO</AssemblyName>
+    <Description>Provides input and output functionality to the BeagleBone Black</Description>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+    <PlatformTarget>x86</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+    <PlatformTarget>x86</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Mono.Posix" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Port.cs" />
+    <Compile Include="PortFS.cs" />
+    <Compile Include="InputPortFS.cs" />
+    <Compile Include="OutputPortFS.cs" />
+    <Compile Include="GpioConfig.cs" />
+    <Compile Include="GpioEnum.cs" />
+    <Compile Include="GpioUtils.cs" />
+    <Compile Include="RPIDefinitions.cs" />
+    <Compile Include="OutputPortMM.cs" />
+    <Compile Include="PortMM.cs" />
+    <Compile Include="InterruptEventHandlerMM.cs" />
+    <Compile Include="InterruptMode.cs" />
+    <Compile Include="InterruptPortMM.cs" />
+    <Compile Include="EventData.cs" />
+    <Compile Include="GPIOPinMuxModeEnum.cs" />
+    <Compile Include="InputPortMM.cs" />
+    <Compile Include="FSPortDirectionEnum.cs" />
+    <Compile Include="GPIOPullUpDownModeEnum.cs" />
+    <Compile Include="I2CPortEnum.cs" />
+    <Compile Include="I2CPortFS.cs" />
+    <Compile Include="SPIModeEnum.cs" />
+    <Compile Include="SPIPortEnum.cs" />
+    <Compile Include="SPIPortFS.cs" />
+    <Compile Include="SPI_IOC_Transfer.cs" />
+    <Compile Include="SPISlaveDeviceEnum.cs" />
+    <Compile Include="SPISlaveDeviceHandle.cs" />
+    <Compile Include="PWMPortEnum.cs" />
+    <Compile Include="PWMPortFS.cs" />
+    <Compile Include="SerialPortBaudRateEnum.cs" />
+    <Compile Include="SerialPortBitLengthEnum.cs" />
+    <Compile Include="SerialPortEnum.cs" />
+    <Compile Include="SerialPortFS.cs" />
+    <Compile Include="SerialPortOpenModeEnum.cs" />
+    <Compile Include="SerialPortParityEnum.cs" />
+    <Compile Include="SerialPortStopBitsEnum.cs" />
+    <Compile Include="TermiosStruct.cs" />
+    <Compile Include="RPITypeEnum.cs" />
+    <Compile Include="MemoryMapDevMem.cs" />
+    <Compile Include="RPICSIOConfig.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

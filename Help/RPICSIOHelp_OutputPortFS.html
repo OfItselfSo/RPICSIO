@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The OutputPortFS Class</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Output/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The OutputPortFS Class</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_InterruptPortMM.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_OutputPortMM.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="OutputPort Class"></A>
+<h2>The OutputPortFS Class</h2>
+<P>
+The OutputPortFS class is designed to set the state (high or low) of a GPIO pin on the Raspberry Pi via a SYSFS access method. The maximum output
+rate has been observed to be in the range of about 1 KHz. The <code><a href="RPICSIOHelp_OutputPortMM.html">OutputPortMM</a></code> class is a similar 
+version of this class which uses Memory Mapped access. 
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/OutputPortFS.cs.html">browseable form</a>.
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Example Code</h3>
+<DL>
+Example code which demonstrates the use of this class can be found on the <a href="RPICSIOHelp_OutputPortExample.html">Output Port Example</a> page.
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<code>public class OutputPortFS : PortFS, IDisposable</code>
+<P>
+<DL>Provides output port functionality for a Raspberry Pi (SYSFS Version).</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Constructors</h3>
+<DL>
+<P>
+<code> public OutputPortFS(GpioEnum gpioIDIn) : base(gpioIDIn)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>gpioIDIn - The GPIO the port will access.
+</DL>
+
+<P>
+&nbsp;
+
+<P>
+<code> public OutputPortFS(GpioEnum gpioIDIn, bool initialState) : base(gpioIDIn)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>gpioIDIn - The GPIO the port will access.
+<DD>initialState - The initial state, true or false, of the port.
+</DL>
+
+<P>
+&nbsp;
+<P>
+</DL>
+<h3>Public Methods</h3>
+<DL>
+<code>public override void ClosePort()</code>
+<P>
+<DL>Closes the port. Throws an exception on failure, including if the port is already closed.
+This is really just doing the equivalent of a shell command 
+<code>echo &lt;gpioID&gt; &gt; /sys/class/gpio/unexport</code>
+after which the <code>/sys/class/gpio/gpio&lt;gpioID&gt</code> directory should not exist.</DL>
+</DL>
+<P>
+&nbsp;
+<P>
+<DL>
+<code>public void Dispose()</code>
+<P>
+<DL>Implements IDisposable. Should be called after the class is closed to release resources.</DL>
+<P>
+&nbsp;
+<P>
+<code>public override PortDirectionEnum PortDirection()</code>
+<P>
+<DL>Gets the PortDirection</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>A <i>PortDirectionEnum</i> value. This value is always <i>PortDirectionEnum.PORTDIR_INPUT</i>.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public bool Read()</code>
+<P>
+<DL>Gets the port value (high or low) as a boolean. This is really just doing the equivalent of a shell command 
+<code>echo &lt;value_as_string&gt; &gt; /sys/class/gpio/gpio&lt;gpioID&gt;/value</code></DL>
+<P>
+<DL>
+<DT>Returns
+<DD><i>true</i>, the GPIO pin is at a high voltage level. <i>false</i> - GPIO pin is at a low voltage level.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public void Write(bool valueToSet)</code>
+<P>
+<DL>Sets the port state. This is really just doing the equivalent of a shell command 
+<code>echo &lt;value_as_string&gt; &gt; /sys/class/gpio/gpio&lt;gpioID&gt;/value</code></DL>
+<P>
+<DL>
+<DT>Parameters
+<DD><i>true</i>, set the GPIO pin to a high voltage level. <i>false</i> - set the GPIO pin to a low voltage level.
+</DL>
+
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Properties</h3>
+<DL>
+<code>public GpioConfig GpioCfgObject { get; }</code>
+<P>
+<DL>Gets the objects gpioCfgObject. There is no set accessor. This object is built in the constructor</DL>
+<P>
+<DL>
+<DT>value
+<DD>The working gpioID.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public GpioEnum GpioID { get; }</code>
+<P>
+<DL>Gets the objects gpioID. There is no set accessor. This value is set in the constructor</DL>
+<P>
+<DL>
+<DT>value
+<DD>The working gpioID.
+</DL>
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_InterruptPortMM.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_OutputPortMM.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

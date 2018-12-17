@@ -1,0 +1,8 @@
+RPICSIO Software Version Change Log
+
+Version 01.00 - 13 Jan. 2017 
+    First Release 
+
+Version 01.00 - 17 Dec. 2018
+    Placed up on GitHub
+

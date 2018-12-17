@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: Interrupt Port Example Code</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Interrupt/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>InterruptPort Example Code</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="InterruptPort Example Code"></A>
+<h2>About the InterruptPort classes</h2>
+<P>
+The InterruptPortMM class is designed to send an .NET event to a subscriber when the state (high or low) of a GPIO pin on the Raspberry Pi changes. 
+The RPICSIO library usually provides classes for both SYSFS and Memory Mapped access however the InterruptPort functionality is only available in 
+MemoryMapped mode.
+<P>
+The InterruptPortMM class automatically configures the GPIO as an input in exactly the same way as a normal InputPort. Note that you will need to configure
+pull-up and pull-down resistors on the port in exactly the same way as the InputPort classes. 
+<P>
+The example code below uses a GPIO value of 4 which is exposed as pin 7 on the header. In general, on the Raspberry Pi 2, these GPIOs are available for input or output by default. However it is possible to adjust the pinmux with the device tree to use header pins for alternate devices. If you are messing about with the Device
+Tree you will probably know what you have configured specific pins to use.
+<P>
+The GPIOs themselves can be either outputs or inputs and it is possible to configure internal pull-up or pull-down resistors on an input. The act of creating an RPICSIO InterruptPort class on a GPIO will configure it as an input. However, you will need to configure the pull-up or pull-down resistors as required. The InterruptPort class has function calls for this purpose.  
+<P>
+<h2>Warnings - READ THIS!!!</h2>
+<P>
+Always be aware that the Raspbian Linux running on the Raspberry Pi is <font color="red">not a real-time operating system</font>. This means, for example, although you might set up an InterruptPort object to trigger on a the state change of a GPIO, the actual timing of some of the events may vary (and there may be lengthy gaps) as the process is pre-emptively swapped in and out by the kernel.
+<P>
+Be aware of the RPI max input voltage (3.3v) and pullup/pulldown resistors. Be really careful about the voltage you provide here. In general it 
+is usually a good idea to run the input through some sort of buffer to clamp the max input at the RPI maximum.
+<P>
+This is not a true real-time interrupt. It has a lot more in common with a C language poll() call. Please see the comments on the <a href="RPICSIOHelp_InterruptPortMM.html">InteruptPortMM</a> documentation for notes on its method of operation.
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+<h2>An Example of the InterruptPort Usage</h2>
+<P>
+The code below illustrates how to use the InterruptPortMM class to monitor the state of a GPIO pin and send an event to a remote method (which can
+be in an entirely different class). The example interrupt handler simply outputs a summary of the event to the console.
+<pre>
+        /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        /// &lt;summary&gt;
+        /// Creates and monitors an interrupt port.
+        /// &lt;/summary&gt;
+        /// 
+        /// NOTE:
+        ///    Be aware of the RPi max input voltage and pullup/pulldown resistors. 
+        ///    Interrupt or not it the pin is still an input. Be really careful about 
+        ///    the voltage you provide here. In general it is usually a good idea to 
+        ///    run the input through some sort of buffer to cap the max input at the 
+        ///    RPi maximum.
+        /// 
+        /// NOTE:
+        ///    this is not a true interrupt. It has a lot more in common with a C 
+        ///    language poll() call.
+        /// 
+        /// STANDARD NOTE:
+        ///   Be aware that you have to tell RPICSIO what type of Pi you are using. This
+        ///   is done by issuing the call below somewhere before you open any port. It
+        ///   only needs to be done once (replace the '2' with a 3 or 0 as appropriate).
+        /// 
+        ///   RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+        /// 
+        /// SIMPLE Test Harness
+        ///   connect a wire to GPIO_4 (pin 7)
+        /// 
+        ///   Once you have done that the issue a call like
+        ///     SimpleInterruptPortMM(GpioEnum.GPIO_4, InterruptMode.InterruptRisingEdgeTransient);
+        ///   
+        ///     then ground the wire by touching it to pin 39. This should generate a
+        ///     output on the screen indicating the ground has happened. The events appear
+        ///     in a call to the IpPortGPIO_OnInterrupt code below. Note, usually a lot of
+        ///     events will be triggered because such a simple test system has no debouncing.
+        ///
+        /// &lt;param name="eventInterruptModeIn"&gt;The interrupt mode&lt;/param&gt;
+        /// &lt;param name="gpioIn"&gt;The gpio this port represents. &lt;/param&gt;
+        /// &lt;history&gt;
+        ///    01 Dec 16  Cynic - Originally written
+        /// &lt;/history&gt;
+        public void SimpleInterruptPortMM(GpioEnum gpioIn, InterruptMode eventInterruptModeIn)
+        {
+            if (gpioIn == GpioEnum.GPIO_NONE)
+            {
+                throw new Exception ("Bad interrupt port GpioEnum.GPIO_NONE");
+            }
+
+            // create an interrupt port.
+            InterruptPortMM ipPortGPIO = new InterruptPortMM(gpioIn, GPIOPullUpDownModeEnum.PULLUPDOWN_UP, eventInterruptModeIn);
+            // Hook up an event handler to the OnInterrupt event 
+            // the IpPortGPIO_OnInterrupt function will receive the incoming event data
+            ipPortGPIO.OnInterrupt += new InterruptEventHandlerMM(IpPortGPIO_OnInterrupt);
+            // we will not get any data if it is not enabled
+            ipPortGPIO.EnableInterrupt();
+            // run until we get key press on the console
+            while (Console.KeyAvailable == false)
+            {
+                // sleep for a second
+                Thread.Sleep(1000);
+            }
+            // this just stops all transmissions. The interrupt can be enabled again
+            // NOTE: disabling the interrupt does not release the event resources
+            ipPortGPIO.DisableInterrupt();
+            // close the port
+            ipPortGPIO.ClosePort();
+            // usually a good idea to dispose()
+            ipPortGPIO.Dispose();
+            // we never can use this object again after it is disposed. To use it
+            // again we would have to re-create it
+            ipPortGPIO = null;
+        }
+</pre> 
+
+The above code subscribes to the InterruptPort's OnInterrupt event and any events will appear in the named
+<code>IpPortGPIO_OnInterrupt</code> handler. Example code for the <code>IpPortGPIO_OnInterrupt</code> handler is given below. You can
+route more than one InterruptPort to the same handler - however to do anything useful you will need to 
+use the information passed in during the event to figure out which event was triggered.
+<P>
+Note that the code below <font color="red">executes in a different thread</font> than the one in which the InterruptPortMM was
+created. You should not do any lengthy processing in the interrupt handler thread as no other interrupts can be processed
+until the current interrupt is cleared.
+<P>
+<pre>
+        /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        /// &lt;summary&gt;
+        /// An InterruptPort interrupt event handler. This is where the data from 
+        /// the interrupt arrives. Note the EventData object contains more
+        /// detailed information than the passed in arguments - including a 
+        /// reference to the InterruptPort object which generated the event.
+        ///    
+        /// NOTE:
+        ///    Be aware that this handler method which accepts the data from 
+        ///    an InterruptPort event is executing in the InterruptPort's event 
+        ///    thread - not the main() thread. You have to be careful what you do 
+        ///    in here to avoid the many issues associated with multi-threaded 
+        ///    applications. 
+        /// 
+        /// NOTE: Be Quick. It is not advisable to take to long to process the 
+        ///    incoming event data - you cannot receive another interrupt while 
+        ///    processing the current one and the fact that a lost interrupt
+        ///    happened will not be recorded
+        ///
+        /// NOTE:
+        ///    this is not a true interrupt. It has a lot more in common with a C 
+        ///    language poll() call.
+        /// 
+        /// &lt;/summary&gt;
+        /// &lt;param name="evGpio"&gt;The gpio the event is configured on&lt;/param&gt;
+        /// &lt;param name="evState"&gt;The event state (1 or 0)&lt;/param&gt;
+        /// &lt;param name="evTime"&gt;The event time&lt;/param&gt;
+        /// &lt;param name="evData"&gt;The event data structure&lt;/param&gt;
+        /// &lt;history&gt;
+        ///    01 Dec 16  Cynic - Originally written
+        /// &lt;/history&gt;
+        public void IpPortGPIO_OnInterrupt(GpioEnum evGpio, bool evState, DateTime evTime, EventData evData)
+        {
+            // here we process and take action on the incoming data
+            // in this particular example we just write it out to the 
+            // console
+            if (evData != null)
+            {
+                // this function could receive data from multiple
+                // interrupt ports. To decide what action to take we could
+                // look at the user specified evCode or the GPIO number
+                // down in the evData object. 
+
+                // just output some diagnostics
+                Console.WriteLine (evData.ToString ());
+
+                // if we have to call ClearInterrupt() on the port 
+                // we can do it this way
+                if (evData.PortObject != null)
+                {
+                    evData.PortObject.ClearInterrupt();
+                }
+            }
+        }
+</pre> 
+
+In the <code>SimpleInterruptPortMM</code> call, the <code>gpioID</code> and <code>eventInterruptModeIn</code> are passed in when the function was called. 
+These values are members of the 
+<code><a href="RPICSIOHelp_GPIOEnum.html">GpioEnum</a></code> and <code><a href="RPICSIOHelp_InterruptMode.html">InterruptMode</a></code> enumerations.
+The called would be made via a line which looks like:
+<pre>
+SimpleInterruptPortMM(GpioEnum.GPIO_4, InterruptMode.InterruptRisingEdgeTransient);
+</pre> 
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+</body>
+</html>
+

@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: Input Port Example Code</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Input/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>InputPort Example Code</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="InputPort Example Code"></A>
+<h2>About the InputPort classes</h2>
+<P>
+The InputPort classes are designed to read the state (high or low) of a GPIO pin on the Raspberry Pi. In the Linux operating system there are
+two ways of accessing the GPIO pins. The first, called the SYSFS method, is the standard and approved Linux technique. During SYSFS accesses
+each GPIO is exposed as a file in the filesystem and the GPIO is manipulated as if it were a file. The second method, called 
+Memory Mapped access, treats the Raspberry Pi's RAM memory as if it were a file and the GPIO state is manipulated as if
+it were a bit at an offset in a virtual file.
+<P>
+The major difference between the two techniques is that the SYSFS method is considerably slower than Memory Mapped access. For example, a maximum read 
+frequency of about 1KHz is obtainable with SYSFS whereas something in the order of 2.4MHz (yes, mega Hertz) is obtainable with the Memory Mapped 
+technique on a Raspberry Pi 2. SYSFS is the approved <I>&quot;Linux Way&quot;</I>. However, if you need the speed, Memory Mapped access is the way to go.
+<P>
+The RPICSIO library provides classes for both SYSFS and Memory Mapped access. The classes can be differentiated by the corresponding <code>FS</code> and
+<code>MM</code> appended to their names. The <a href="RPICSIOHelp_InputPortFS.html">InputPortFS</a> class provides SYSFS access to the GPIO 
+and the <a href="RPICSIOHelp_InputPortMM.html">InputPortMM</a> class provides Memory Mapped access.
+<P>
+When should you use SYSFS or Memory Mapped access? Well, in testing, both seemed pretty robust and trouble free. If you need a read frequency greater than about 500Hz 
+(beware the <a href="http://en.wikipedia.org/wiki/Nyquist_frequency">Nyquist Frequency</a>) you'll
+definitely want to use the InputPortMM class - otherwise the InputPortFS class will probably suffice. Both classes are used in exactly the same way and have exactly
+identical public members.
+<P>
+The example code below uses a GPIO value of 4 which is exposed as pin 7 on the header. In general, on the Raspberry Pi 2, these GPIOs are available for input or output by default. However it is possible to adjust the pinmux with the device tree to use header pins for alternate devices. If you are messing about with the Device
+Tree you will probably know what you have configured specific pins to use.
+<P>
+The GPIOs themselves can be either outputs or inputs and it is possible to configure internal pull-up or pull-down resistors on an input. The act of creating an RPICSIO InputPort class on a GPIO will configure it as an input. However, you will need to configure the pull-up or pull-down resistors as required. The InputPort class has function calls for this purpose.  
+<P>
+<h2>Warnings - READ THIS!!!</h2>
+<P>
+Always be aware that the Raspbian Linux running on the Raspberry Pi is <font color="red">not a real-time operating system</font>. This means, for example, although you might set up an InputPort() object to read at 10000 times a second, the actual timing of some of the reads may vary (and there may be lengthy gaps) 
+as the process is pre-emptively swapped in and out by the kernel.
+<P>
+Be aware of the RPI max input voltage (3.3v) and pullup/pulldown resistors. Be really careful about the voltage you provide here. In general it 
+is usually a good idea to run the input through some sort of buffer to clamp the max input at the RPI maximum.
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+<h2>An Example of the InputPort Usage</h2>
+<P>
+The code below illustrates how to use the InputPortMM class to read the state of a GPIO pin and output that state to the console. You could use the SYSFS
+version by replacing each <code><a href="RPICSIOHelp_InputPortMM.html">InputPortMM</a></code> with 
+an <code><a href="RPICSIOHelp_InputPortFS.html">InputPortFS</a></code></a>.
+<pre>
+        /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        /// &lt;summary&gt;
+        /// Reads a GPIO port until a key is pressed and puts the value (true or false) 
+        /// out to the console. Memory mapped version
+        /// 
+        /// NOTE:
+        ///    Be aware of the RPI max input voltage and pullup/pulldown resistors. 
+        ///    Be really careful about the voltage you provide here. In general it 
+        ///    is usually a good idea to run the input through some sort of buffer
+        ///    to cap the max input at the RPI maximum.
+        /// 
+        /// STANDARD NOTE:
+        ///   Be aware that you have to tell RPICSIO what type of Pi you are using. This
+        ///   is done by issuing the call below somewhere before you open any port. It
+        ///   only needs to be done once (replace the '2' with a 3 or 0 as appropriate).
+        /// 
+        ///   RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+        /// 
+        /// SIMPLE Test Harness
+        ///   connect a wire to GPIO_4 (pin 7)
+        /// 
+        ///   Once you have done that the issue a call like
+        ///     outTest.SimpleReadPortMM(GpioEnum.GPIO_4);
+        ///   
+        ///     then ground the wire by touching it to pin 39 (gnd) and then pin 17 (3.3v). 
+        ///     This should generate a series of lows and highs the state of which will be 
+        ///     output to the screen.
+        ///
+        /// &lt;/summary&gt;
+        /// &lt;param name="gpioID"&gt;The gpioID&lt;/param&gt;
+        /// &lt;history&gt;
+        ///    01 Dec 16  Cynic - Originally written
+        /// &lt;/history&gt;
+        public void SimpleReadPortMM(GpioEnum gpioID)
+        {
+            // open the port
+            InputPortMM inPort = new InputPortMM(gpioID, GPIOPullUpDownModeEnum.PULLUPDOWN_DOWN);
+
+            // look for the input until we have a keypress on the console
+            while (Console.KeyAvailable == false)
+            {
+                bool inVal = inPort.Read();
+                Console.WriteLine ("inVal = "+inVal.ToString());
+                // sleep for a second
+                Thread.Sleep(1000);
+            }
+
+            // close the port
+            inPort.ClosePort();
+            inPort.Dispose();
+        }
+</pre> 
+In the above code, the <code>gpioID</code> is passed in when the function was called. This value is a member of the 
+<code><a href="RPICSIOHelp_GPIOEnum.html">GpioEnum class</a></code> which lists all possible GPIO's which
+can be present on the Raspberry Pi. The above code is called via a line which looks like:
+<pre>
+SimpleReadPortMM(GpioEnum.GPIO_4);
+</pre> 
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

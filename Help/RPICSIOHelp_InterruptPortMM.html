@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The InterruptPortMM Class</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Interrupt/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The InterruptPortMM Class</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_InterruptMode.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_OutputPortFS.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="InterruptPort Class"></A>
+<h2>The InterruptPortMM Class</h2>
+<P>
+The InterruptPortMM class is designed to monitor the state (high or low) of a GPIO pin on the Raspberry Pi and send an event through
+a designated .NET delegate when the state changes to a pre-defined trigger level. All access is via a Memory Mapped access method. 
+There is no version of this class which uses SYSFS access. 
+<P>
+These are not true interrupts. They have much more in common with
+a polled event although the event will "interrupt" the Main() thread
+and execute code in an object listening on them.
+  
+All GPIOs are associated with one of two banks. The act of creating 
+an InterruptPort on a GPIO will start an event monitoring thread for 
+that bank. This GPIO bank event monitoring thread is continuously 
+computable and there is only one thread per bank. 
+<P>
+The InterruptPort registers with the GPIO bank event monitoring thread  
+and when a pin state change of significance is detected the SendInterruptEvent
+function in this class will be called. The SendInterruptEvent function
+will place the relevant information into an <a href="RPICSIOHelp_EventData.html">EventData</a> object and then
+send it on to anybody listening on the InterruptPorts <a href="RPICSIOHelp_InterruptEventHandlerMM.html">OnInterrupt delegate</a>
+<P>
+Be aware that the OnInterrupt handler method which accepts the data from 
+the C# event is executing in the Gpio banks event monitoring thread 
+- not the main() thread. You have to be careful what you do in there to 
+avoid the many issues associated with multi-threaded applications. 
+Also, it is not advisable to take too long to process the incoming event 
+data - you cannot receive another interrupt while processing that one.
+<P>
+PRIORITYS: The GPIO bank event monitoring thread will detect changes
+and then run down its list of registered InterruptPort until it finds
+the correct one for that pin state change. The order of these registered
+InterruptPorts is the Priority - highest first. Thus, if two pins change
+state simultaneously then only one will get processed. If on a subsequent
+pass the second interrupts pin state is still changed, it will get 
+processed then. If it has changed back it will not be processed and the
+interrupt event will be lost.
+<P>
+CLOSING DOWN: Be aware that a call to DisableInterrupt() does not stop 
+the worker thread. You need to do an explicit ClosePort() call to stop 
+the thread and release any resources the InterruptPort is using. Always 
+explicitly Dispose() all ports when you are done with them. 
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/InterruptPortMM.cs.html">browseable form</a>.
+<P>
+</DL>
+<P>
+&nbsp;
+<P>
+<h3>Example Code</h3>
+<DL>
+Example code which demonstrates the use of this class can be found on the <a href="RPICSIOHelp_InterruptPortExample.html">Interrupt Port Example</a> page.
+</DL>
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<code>public class InterruptPortMM : PortMM, IComparable, IDisposable</code>
+<P>
+<DL>Provides interrupt port functionality for a Raspberry Pi (Memory Mapped Version).</DL>
+<P>
+</DL>
+<P>
+&nbsp;
+<P>
+<h3>Public Constructors</h3>
+<DL>
+<P>
+<code>public InterruptPortMM (GpioEnum gpioIn, InterruptMode eventInterruptModeIn) : base(gpioIn)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>gpioIDIn - The GPIO the port will access.
+<DD>InterruptMode - The Interrupt Mode the port will trigger on.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public InterruptPortMM (GpioEnum gpioIn, InterruptMode eventInterruptModeIn, int evPriorityIn, int evCodeIn) : base(gpioIn)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>gpioIDIn - The GPIO the port will access.
+<DD>InterruptMode - The Interrupt Mode the port will trigger on.
+<DD>evPriorityIn - The event priority relative to other InterruptPort objects on the same GPIO bank. Higher numbers are processed first.
+<DD>evCodeIn - A user specified code which appears in the event output.
+</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Fields</h3>
+<DL>
+<P>
+<code> public event <a href="RPICSIOHelp_InterruptEventHandlerMM.html">InterruptEventHandlerMM</a> OnInterrupt;</code>
+<P>
+<DL>
+The event through which the InterruptPort class transmits the interrupt data to other objects. 
+</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Methods</h3>
+<DL>
+<P>
+<code>public void ClearInterrupt()</code>
+<P>
+<DL>Clears the interrupt. Must be called after every interrupt before a new interrupt can be received.</DL>
+<P>
+&nbsp;
+<P>
+<code>public override void ClosePort()</code>
+<P>
+<DL>Closes the port. Dispose() should subsequently be called to release resources. It is not possible to re-open a
+closed InterruptPort - a new instance must be created.</DL>
+<P>
+&nbsp;
+<P>
+<code>public void DisableInterrupt()</code>
+<P>
+<DL>Disables the interrupt. Interrupts can be disabled when not needed and re-enabled without re-creating the interrupt.</DL>
+<P>
+&nbsp;
+<P>
+<code>public void Dispose()</code>
+<P>
+<DL>Implements IDisposable. Should be called after the class is closed to release resources.</DL>
+<P>
+&nbsp;
+<P>
+<code>public void EnableInterrupt()</code>
+<P>
+<DL>Enables the interrupt. Interrupts can be disabled when not needed and re-enabled without re-creating the interrupt.</DL>
+<P>
+&nbsp;
+<P>
+<code>public override PortDirectionEnum PortDirection()</code>
+<P>
+<DL>Returns the port direction. This value is always <i>PortDirectionEnum.PORTDIR_INPUT</i>.</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>A <i>PortDirectionEnum</i> value. 
+</DL>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Properties</h3>
+<DL>
+<code>public int InterruptEventPriority { get; set; }</code>
+<P>
+<DL>Gets/Sets the event priority. For InterruptPorts on the same bank,
+the InterruptPort with the higher priority will be activated in
+preference to the others if there simultaneous events.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The event priority relative to other InterruptPort objects on the same GPIO bank. Higher numbers are processed first.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int EvCode { get; }</code>
+<P>
+<DL>Gets/Sets the event code. This is a userdefined value specified when the interrupt port was created and will
+be present in the generated interrupt event.</DL> 
+<P>
+<DL>
+<DT>value
+<DD>A user defined value specified when the interrupt port was created. 
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public InterruptMode EventInterruptMode { get; set; }</code>
+<P>
+<DL>Gets/Sets the events interrupt mode. </DL>
+<P>
+<DL>
+<DT>value
+<DD>The events interrupt mode
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public GpioConfig GpioCfgObject { get; }</code>
+<P>
+<DL>Gets the objects gpioCfgObject. There is no set accessor. This object is built in the constructor</DL>
+<P>
+<DL>
+<DT>value
+<DD>The working gpioID.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public GpioEnum GpioID { get; }</code>
+<P>
+<DL>Gets the objects gpioID. There is no set accessor. This value is set in the constructor</DL>
+<P>
+<DL>
+<DT>value
+<DD>The working gpioID.
+<P>
+&nbsp;
+<P>
+</DL><code>public int InterruptEventsReceived { get; set; }</code>
+<P>
+<DL>Gets/Sets the count of events received. Events triggered and lost because the processing of another event
+took too long are not included in this count. </DL>
+<P>
+<DL>
+<DT>value
+<DD>The count of events received. 
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int InterruptEventsSent { get; set; }</code>
+<P>
+<DL>Gets/Sets the cound of events sent. It is possible to receive an event and not send it if the port is not enabled when the event is received.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The count of events sent. 
+</DL>
+<P>
+</DL>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_InterruptMode.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_OutputPortFS.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

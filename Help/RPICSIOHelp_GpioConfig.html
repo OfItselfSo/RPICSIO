@@ -1,0 +1,355 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The GpioConfig Class</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Output/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The GpioConfig Class</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_FSPortDirectionEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_GpioEnum.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="GpioConfig Class"></A>
+<h2>The GpioConfig Class</h2>
+<P>
+The GpioConfig class provides a container to correlate various GPIO related information such as HeaderPinNumber, 
+the GPIO and also the configuration state of the GPIO. This class is used for both the SYSFS and MemoryMapped versions of 
+the <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a>
+classes and some class members are only relevant during a specific access mode.
+<P>
+This class is primarily intended for internal use within the various port objects and there is little need for direct interaction by
+external objects. These objects are usually auto-generated in the constructor of the port classes from the input GpioID using the tools and configuration
+information hardcoded in the static GpioUtils class.
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/GpioConfig.cs.html">browseable form</a>.
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<code>public class GpioConfig</code>
+<P>
+<DL>A class to contain all of the required data for a GPIO.</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Constructors</h3>
+<DL>
+<P>
+<code>public GpioConfig()</code>
+<P>
+<DL>Default Constructor.</DL>
+<P>
+&nbsp;
+<P>
+<code>public GpioConfig(int headerPinIn, bool isDefaultGPIOOnHeaderIn, int gpioNumIn, GpioEnum gpioIn)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>headerPinIn - The number of the header pin.
+<DD>isDefaultGPIOOnHeaderIn - true the GPIO is default on the header, false it is not.
+<DD>gpioNumIn - The gpio as a number.
+<DD>gpioIn - The gpio as an enum.
+</DL>
+
+<P>
+&nbsp;
+<P>
+</DL>
+<h3>Public Methods</h3>
+<DL>
+<code>public string GpioSettingsAsString()</code>
+<P>
+<DL>Outputs the GPIO Settings as a string.</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Properties</h3>
+<DL>
+<code>public int EventBank { get; }</code>
+<P>
+<DL>Gets the event bank number.  This function just recovers the bank from the calculated GPIO number. </DL>
+<P>
+<DL>
+<DT>value
+<DD>The event bank. This is the just GPIO/32.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int EventBit { get; }</code>
+<P>
+<DL>Gets the event bit number. This is the offset of a GPIO into its bank.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The event bit. This is the remainder of GPIO/32.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public GpioEnum Gpio { get; }</code>
+<P>
+<DL>Gets the Gpio enum. There is no set accessor - this value set in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The Gpio as an enum.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int GpioBank { get; }</code>
+<P>
+<DL>Gets the Gpio bank. There is no set accessor - this value is calculated
+from the GpioID in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The Gpio bank which will be a value of 0 or 1.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int GpioBankOffset { get; }</code>
+<P>
+<DL>Gets the Gpio bank offset. There is no set accessor - this value is calculated
+from the GpioID in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The Gpio bank offset which will be a value of 0 or 4.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int GpioBit { get; }</code>
+<P>
+<DL>Gets the Gpio bit. There is no set accessor - this value is calculated
+from the GpioID in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The bit offset in the PinMux Gpio bank. This is the remainder of GpioNum/32.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int GpioMask { get; }</code>
+<P>
+<DL>Gets the Gpio mask. There is no set accessor - this value is calculated
+from the GpioID in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The bit offset in the PinMux Gpio bank. This is a 0x01 shifted left by the GpioBit value.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public GPIOPinMuxModeEnum GpioMode { get; }</code>
+<P>
+<DL>Gets the mode of the GPIO - this is the setting of the pinmux. There is no set accessor - this value is calculated
+from the GpioID in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The pinmux mode state of the GPIO.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int GpioNum { get; }</code>
+<P>
+<DL>Gets the number of GPIO. There is no set accessor - this value is set
+in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The number the GPIO.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int GpioPinMuxModeMask { get; }</code>
+<P>
+<DL>Gets the mode mask for the GPIO. There is no set accessor - this value is calculated
+from the GpioNum.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The pinmux mode mask for the GPIO.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int GpioPinMuxModeShift { get; }</code>
+<P>
+<DL>Gets the number of bits we have to shift the function (pinmux) register to convert it to or from an int. There is no set accessor - this value is calculated
+from the GpioNum.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The pinmux mode mask shift value for the GPIO.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int GpioSetting { get; }</code>
+<P>
+<DL>Gets the GpioSettings. This is the raw hex bits that determine the various mode settings.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The bits of the Gpio Setting.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int HeaderPin { get; }</code>
+<P>
+<DL>Gets the Header Pin. There is no set accessor - this value set in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The header pin. This is the pin which exposes the GPIO on the header.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public bool IsDefaultGPIOOnHeader { get; }</code>
+<P>
+<DL>Detects if the GPIO is a default GPIO on the header rather than needing to be muxed in because that pin is used by some other device. There is no set accessor - this value set in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>true the GPIO is a default GPIO, false it is not.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int MuxMode { get; }</code>
+<P>
+<DL>Gets the Mux Mode. Gets the MuxMode. These are the three lsb bits of the GpioSetting.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The mux Mode.  Essentially just gpioSetting & 0x07;   
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public string MuxOwner { get; }</code>
+<P>
+<DL>Gets the Mux Owner. There is no set accessor - this value is set via a call to
+UpdateConfigurationWithPinmuxPinsFileInfo()</DL>
+<P>
+<DL>
+<DT>value
+<DD>The mux owner. Only set on SYSFS mode ports  
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int MuxPin { get; }</code>
+<P>
+<DL>Gets the Mux Pin. There is no set accessor - this value is set via a call to
+UpdateConfigurationWithPinsFileInfo()</DL>
+<P>
+<DL>
+<DT>value
+<DD>The mux pin. Only set on SYSFS mode ports  
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int PinmuxRegisterOffset { get; }</code>
+<P>
+<DL>Gets the PinMux register offset. There is no set accessor - this value set in the Constructor.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The PinMux register offset. 
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public string PinmuxRegisterOffsetAsHexString { get; }</code>
+<P>
+<DL>Gets the PinMux register offset. There is no set accessor - this value calculated from the PinmuxRegisterOffset.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The PinMux register offset as a hex string. This is a convenience for display purposes.
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public int PullupPulldownMode { get; }</code>
+<P>
+<DL>Detects if the gpio is in pull up or pull down mode. There is no set accessor - this value calculated from the GpioSetting.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The PullupsPulldownsEnabled state. The actual
+pull up or pull down resistor is only truely operational if PullupsPulldownsEnabled
+is true. 
+</DL>
+<P>
+&nbsp;
+<P>
+<code>public bool PullupsPulldownsEnabled { get; }</code>
+<P>
+<DL>Detects if pullups/pulldowns are enabled. There is no set accessor - this value calculated from the GpioSetting.</DL>
+<P>
+<DL>
+<DT>value
+<DD>The PullupsPulldownsEnabled state. Note this does not indicate if the port has a pullup or pulldown configured -
+just that one or the other is enabled on that port. 
+</DL>
+<P>
+&nbsp;
+<P>
+
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_FSPortDirectionEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_GpioEnum.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

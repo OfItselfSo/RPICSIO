@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The InterruptMode Enum</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO Input/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The InterruptMode Enum</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_InterruptEventHandlerMM.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_InterruptPortMM.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="InterruptMode Enum"></A>
+<h2>The InterruptMode Enum</h2>
+<P>
+The InterruptMode enum defines the type of interrupt event which will trigger an 
+<a href="RPICSIOHelp_InterruptPortMM.html">InterruptPort</a>'s OnInterrupt event. 
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/InterruptMode.cs.html">browseable form</a>.
+<P>
+</DL>
+
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<pre>
+   public enum InterruptMode
+    {
+        InterruptNone = 0,
+        InterruptRisingEdge = 1,    // A value that sets the port so that its interrupt is triggered on a rising edge.
+        InterruptFallingEdge = 2,   // A value that sets the port so that its interrupt is triggered on a falling edge.
+        InterruptRisingEdgeTransient = 4,    // A value that sets the port so that its interrupt is triggered on a rising edge transient too fast to be sampled by the system clock.
+        InterruptFallingEdgeTransient = 8,   // A value that sets the port so that its interrupt is triggered on a falling edge transient too fast to be sampled by the system clock.
+    }
+</pre>
+</DL>
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_InterruptEventHandlerMM.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_InterruptPortMM.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

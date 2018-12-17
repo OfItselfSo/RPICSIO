@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: The PWMPortFS Class</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# Input/Output Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono Pulse Width Modulation PWM Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>The PWMPortFS Class</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_PWMPortEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| Next  &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="PWMPort Class"></A>
+<h2>The PWMPortFS Class</h2>
+<P>
+The PWMPortFS class controls one of the two PWM bus On Chip Peripheral (OCP) devices integrated into the Raspberry Pi 2 CPU via the
+PWM file system access method. 
+<P>
+Note that the device tree overlays that ship with the default Raspian operating system (at the time of writing this documentation) do not work properly. You will need to download a version of the device tree overlays that enables an internal hardware clock. See the notes on the <a href="RPICSIOHelp_PWMPortExample.html#EnablingThePWMPorts">PWM Port Example</a> page for more information.
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+&nbsp;
+<P>
+<h3>Source Code</h3>
+<DL>
+The source code for this class is available online for 
+<a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php#Download">download</a>
+and also in 
+<a href="http://www.ofitselfso.com/RPICSIO/Source/PWMPortFS.cs.html">browseable form</a>.
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Example Code</h3>
+<DL>
+Example code which demonstrates the use of this class can be found on the <a href="RPICSIOHelp_PWMPortExample.html">PWM Port Example</a> page.
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Syntax</h3>
+<DL>
+<code>public class PWMPortFS : PortFS</code>
+<P>
+<DL>Provides Pulse Width Modulation (PWM) port functionality for a Raspberry Pi (File System Version).</DL>
+<P>
+</DL>
+
+<P>
+&nbsp;
+<P>
+<h3>Public Constructors</h3>
+<DL>
+<P>
+<code>public PWMPortFS(PWMPortEnum pwmPortIn) : base(GpioEnum.GPIO_NONE)</code>
+<P>
+<DL>Constructor.</DL>
+<P>
+<DL>
+<DT>Parameters
+<DD>pwmPortIn - The PWM port to access.
+</DL>
+
+<P>
+&nbsp;
+<P>
+</DL>
+<h3>Public Methods</h3>
+<DL>
+<code>public override void ClosePort()</code>
+<P>
+<DL>Closes the port.</DL>
+<P>
+&nbsp;
+</DL>
+<P>
+<DL>
+<code>public void Dispose()</code>
+<P>
+<DL>Implements IDisposable. Should be called after the class is closed to release resources.</DL>
+<P>
+&nbsp;
+<P>
+<code>public override PortDirectionEnum PortDirection()</code>
+<P>
+<DL>Gets the PortDirection</DL>
+<P>
+<DL>
+<DT>Returns
+<DD>A <i>PortDirectionEnum</i> value. This value is always <i>PortDirectionEnum.PORTDIR_OUTPUT</i>.
+</DL>
+<P>
+&nbsp;
+<P>
+<h3>Public Properties</h3>
+<DL>
+<code>public uint DutyNS { get; set; }</code>
+<P>
+<DL>Gets/Sets the duty cycle of the PWM output square wave form in nanoseconds
+<P>
+The duty cycle is the part of the wave form devoted to a high state.
+</DL>
+<P>
+<DL>
+<DT>value
+<DD>the duty cycle of the PWM output in nanoseconds. This should always
+be less than the PeriodNS.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public double DutyPercent { get; set; }</code>
+<P>
+<DL>Gets/Sets the duty cycle of the PWM output square wave form as a percent</DL>
+<P>
+<DL>
+<DT>value
+<DD>percentage of the input value. Must be between 0 and 100.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public uint FrequencyHz { get; set;}</code>
+<P>
+<DL>Gets/Sets the frequency of the PWM output square wave form.</DL>
+<P>
+<DL>
+<DT>value
+<DD>frequency in Hz.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public uint PeriodNS { get; set;}</code>
+<P>
+<DL>Gets/Sets the period of the PWM output square wave form</DL>
+<P>
+<DL>
+<DT>value
+<DD>the period (1/Freq) in nano seconds.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public PWMPortEnum PWMPort { get; }</code>
+<P>
+<DL>Gets the PWM Port. There is no Set accessor this is set in the constructor</DL>
+<P>
+<DL>
+<DT>value
+<DD>The working PWMPortEnum.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<DL>
+<code>public bool RunState { get; set;}</code>
+<P>
+<DL>Gets/Sets the run state of the PWM output square wave</DL>
+<P>
+<DL>
+<DT>value
+<DD>true - begin running, false - stop running.
+</DL>
+<P>
+&nbsp;
+</DL>
+
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_PWMPortEnum.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_ClassDocs.html">RPICSIO Classes</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| Next  &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+

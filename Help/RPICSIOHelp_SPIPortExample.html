@@ -1,0 +1,286 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>The RPICSIO Help: SPI Port Example Code</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <meta name="description" content="The RPICSIO software is a C# GPIO SPI/SPI Library for the Raspberry Pi" />
+  <meta name="keywords" content="Raspberry Pi C# Mono GPIO Library" />   
+  <link rel="stylesheet" type="text/css" href="OISHelp.css" />
+</head>
+<body>
+<center><h2>RPICSIO</h2></center>
+<center><h1>SPIPort Example Code</h1></center>
+<P> 
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+&nbsp;
+<P>
+<A name="SPIPort Example Code"></A>
+<h2>About the SPIPort Class</h2>
+<P>
+The SPIPort class writes to and reads from the SPI bus On Chip Peripheral (OCP) device integrated into the Raspberry Pi 2 CPU. 
+In the Linux operating system there are two ways of accessing the SPI devices; the first, called SPIDev, is the 
+standard and approved Linux technique. SPIDev is a device driver and if the existence of a SPI port is detected during boot time,
+the device driver interface will be exposed as a file in the <code>/dev</code> directory of the Raspberry Pi file system. The
+SPI ports will only be detected if that port is appropriately configured (using <code>raspi-config</code>). 
+<P>
+The second type of access is called Memory Mapped access and this treats the Raspberry Pi's RAM memory as if it were a file. The SPI port is manipulated as if
+it were a bit at an offset in a virtual file. The RPICSIO library does not, at this time, provide a class which utilizes Memory Mapped access
+to the SPI port - the file system based SPIDev class named <a href="RPICSIOHelp_SPIPortFS.html">SPIPortFS</a> is the only one available.
+<P>
+There is one SPI port on a Raspberry Pi 2. If this port has been correctly configured (using <code>raspi-config</code>), the SPIDev device driver for that port will be accessible via a file in the <code>/dev</code> directory. This file will have names in the format <code>spidev&lt;spiport&gt;.&lt;ssline&gt;</code> where <code>&lt;spiport&gt</code> is the number of the spi port and the <code>&lt;ssline&gt;</code> is the number of the slave select (also known as the chip select) line. 
+Thus the file <code>/dev/spidev0.1</code> is the interface for the SPIDev device driver on SPI port 0 and slave select line 1. If you do not see the <code>spidev*</code> file
+in the <code>/dev</code> directory this means that the SPI device is not correctly configured. By the way, these files are not the sort of files you
+can open and write text to in order control the port (like you do with the SYSFS GPIO subsystem). The spidev files are true device files and if you want them to do anything 
+you have to use an <code>ioctl()</code> call.
+<P>
+Each device on an <a href="http://en.wikipedia.org/wiki/Serial_Peripheral_Interface_Bus">SPI bus</a> has its own enable/disable line called the Slave Select (or sometimes Chip Select) line and the Raspberry Pi functions as the SPI bus master. The SPI device on the Raspberry Pi can control up to 2 Slave Select lines. Effectively this means that, using the SPI ports dedicated slave select lines, it is only possible to have 2 slave devices per SPI port.  However, not to worry, the SPIPortFS class has additional functionality which enables GPIO ports to be used as slave select lines and hence quite a large number of SPI bus devices are possible. 
+<P>
+Please note that with the <a href="RPICSIOHelp_SPIPortFS.html">SPIPortFS</a> class you cannot mix and match GPIO based chip select lines and the SPI ports dedicated chip select lines. If you use one GPIO based slave select line, then all lines must be GPIO based on that port. This is because the chip select lines are tied to the SPIDev device file. Once the spidev* file is opened (and it needs to be in order to write anything at all to the device) 
+the SPI port will always activate the dedicated chip select line for each write and there is no way to stop it doing this. The best
+you can do is ignore the dedicated chip select line (by leaving it unconnected and floating electrically) and using the GPIO based slave selects to activate each device. 
+<P>
+<h2>Warnings - READ THIS!!!</h2>
+<P>
+The SPI port used in the examples below is SPI0 - this must be configured in order for it to be available for use.
+<P>
+The first example code below uses the dedicated <code>SPI_SLAVEDEVICE_CS0</code> as the chip select line and this appears on the header on pin 24. The second example code below uses GPIOs 4 and 17 as chip select lines which are exposed as pin 7 and 11 on the RPi 2's header. 
+<P>
+When using a GPIO as a slave select line on any SPIPort class, the GPIO will be configured as an output in exactly
+the same way as if you were going to use them with one of the <a href="RPICSIOHelp_OutputPortExample.html">OutputPort</a> classes. You do not need to take any action to configure this - it is all done internally. 
+<P>
+The <a href="http://www.ofitselfso.com/RBerrySharp/InstallingRaspbianKernelRaspberryPi.php">Raspbian Linux</a> running on the Raspberry Pi is <font color="red">not a real-time operating system</font>. However, an OCP peripheral such as
+the SPIPort has its own internal clock and so, once the information is given to the port, it will be transmitted and received
+at the configured port speed with no interruptions. However, transfers made via multiple calls to the SPI port can, and will, have variable gaps 
+between transmissions as the process is pre-emptively swapped in and out by the kernel.
+<P>
+Also note it is possible to set the transmission speed for the SPI Port as a default on the port and also to specifically override that speed individually for a
+slave device. For the <a href="RPICSIOHelp_SPIPortFS.html">SPIPortFS</a> class it is much faster, by a factor of about 10, to set the port speed on the port and let the slave device use it as a default than to set it
+individually on each device. This is true even if the slave device speed is set to the exact same speed as the global SPI port default value. There is something 
+in the SPIDev device driver that has to activate internally on each transmission (one or more ioctl() calls probably) to override the SPI port default speed
+for an individual device and this is time consuming. It is far better to set the speed on the SPI port rather than the slave device unless you really need
+to have different speeds for each device.
+<P>
+<font color="red">IMPORTANT NOTE:</font> Before creating any <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">RPICSIO</a> Port class you will need to ensure 
+that the RPICSIO Library knows which type of Raspberry Pi you are dealing with. This is done by executing a call (only once is necessary) like the one below somewhere 
+in your code before you create any port. 
+<PRE>
+            RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+</PRE>
+<P>
+There are two examples below. The <a href="#Example1">first</a> shows a write and read from a SPI slave device using the internal CS0 line. The <a href="#Example2">second example</a> illustrates the use of two GPIO
+base slave select lines to control two different SPI slave devices.
+<P>
+<A name="Example1"></A>
+<h2>Example 1, SPIPort Usage to Write and Read</h2>
+<P>
+The code below illustrates how to use the SPIPortFS class to write and read the a memory location in a slave SPI device and to output that value to the console. 
+<pre>
+        /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        /// &lt;summary&gt;
+        /// Writes to and reads from an SPI port. SPIDev version. This version
+        /// uses the internal slave select SPI_SLAVEDEVICE_CS0 for the chip 
+        /// select line. The SPI device being accessed is an Arduino Gameduino v1.2 
+        /// VGA shield. At its most basic, it is read from by sending two address bytes
+        /// and then a follow up byte of 0x00 to clock in the byte at that address. 
+        /// 
+        /// NOTE: 
+        ///   This code assumes that the SPI port associated with the spiID has been 
+        ///   properly configured. If it is not then the port may not work correctly. 
+        ///   See the associated documentation
+        /// 
+        /// NOTE:
+        ///    Make sure you are aware of how SPI buses work and properly
+        ///    configure the MISO, MOSI, CLK and CS lines.
+        /// 
+        /// &lt;/summary&gt;
+        /// &lt;param name="spiID"&gt;The spi port ID&lt;/param&gt;
+        /// &lt;history&gt;
+        ///    01 Dec 16  Cynic - Originally written
+        /// &lt;/history&gt;
+        public void SPIPortFSTest(SPIPortEnum spiID)
+        {
+            // open the port
+            SPIPortFS spiPort = new SPIPortFS(spiID);
+            
+            // open the slave device
+            SPISlaveDeviceHandle ssHandle = spiPort.EnableSPISlaveDevice(SPISlaveDeviceEnum.SPI_SLAVEDEVICE_CS0);
+            if (ssHandle == null)
+            {
+                throw new Exception("ssHandle == null");
+            }
+
+            // set the mode
+            spiPort.SetMode(SPIModeEnum.SPI_MODE_0);
+            // just for testing, get the mode, not really necessary
+            SPIModeEnum spiMode = spiPort.GetMode();
+            Console.WriteLine("spi mode=" + spiMode.ToString());
+
+            // set our speed
+            spiPort.SetDefaultSpeedInHz(5000000);
+
+            // set up our transmit and receive buffers
+            int bufLen = 3;
+            byte[] txByteBuf = new byte[bufLen];
+            byte[] rxByteBuf = new byte[bufLen];
+
+            // we wish to read the byte at address 0x0001 which is
+            // the Gameduino's major and minor version number
+
+            // populate the transmit buffer with data, we send
+            // two bytes of address and a 0x00 to clock in the
+            // returning information
+            txByteBuf[0] = 0x00;
+            txByteBuf[1] = 0x01;
+            txByteBuf[2] = 0x00;
+      
+            // transfer the data
+            spiPort.SPITransfer(ssHandle, txByteBuf, rxByteBuf, bufLen);
+
+            // report the received data, the first two bytes will
+            // be random values as the Gameduino was still receiving
+            // the address at that time. The third byte will have
+            // the major and minor revision number in each nibble.
+            Console.Write("Received data as hex:");
+            for(int i=0; i &lt; bufLen; i++)
+            {
+                Console.Write(" "+ rxByteBuf[i].ToString("x2"));
+            }
+            Console.Write("\n");           
+
+            // close the port
+            spiPort.ClosePort();
+            spiPort.Dispose();
+        }
+</pre> 
+In the above code, the <code>spiID</code> is passed in when the function was called. This value is a member of the 
+<code><a href="RPICSIOHelp_SPIPortEnum.html">SPIPortEnum class</a></code> which lists all possible SPI ports which
+can be present on the Raspberry Pi. The above code is called via a line which looks like:
+<pre>
+SPIPortFSTest(SPIPortEnum.SPIPORT_0);
+</pre> 
+<P>
+<A name="Example2"></A>
+<h2>Example 2, SPIPort Usage with GPIO's as Slave Select Lines</h2>
+<P>
+The code below illustrates how to use the SPIPortFS class to use GPIO pins as slave select lines and how to write values 
+to those devices. 
+<pre>
+        /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+        /// &lt;summary&gt;
+        /// Writes to an SPI port. SPIDev version. This version uses two GPIO lines 
+        /// as slave select lines for the SPI devices. 
+        /// 
+        /// The devices being written are two SparkFun 7-Segment Serial Displays
+        /// which have an SPI interface but which cannot write back any information
+        /// on the SPI bus. They are write only. The basic mode of operation is just
+        /// to write the ascii values of the four characters you wish to display
+        /// to the device. With two devices we have 8 digits.
+        /// 
+        /// NOTE: 
+        ///   This code assumes that the SPI port associated with the spiID has been 
+        ///   properly configured use raspi-config and enable the SPI port. 
+        /// 
+        /// NOTE:
+        ///    Make sure you are aware of how SPI buses work and properly
+        ///    configure the MISO, MOSI, CLK and CS lines.
+        /// 
+        /// STANDARD NOTE:
+        ///   Be aware that you have to tell RPICSIO what type of Pi you are using. This
+        ///   is done by issuing the call below somewhere before you open any port. It
+        ///   only needs to be done once (replace the '2' with a 3 or 0 as appropriate).
+        /// 
+        ///   RPICSIOConfig.Instance.RPIType = RPITypeEnum.RPITYPE_RPI2;
+        /// 
+        /// &lt;/summary&gt;
+        /// &lt;param name="spiID"&gt;The spi ID&lt;/param&gt;
+        /// &lt;history&gt;
+        ///    01 Dec 16  Cynic - Originally written
+        /// &lt;/history&gt;
+        public void SPIPortFSGPOISSTest(SPIPortEnum spiID)
+        {
+            // open the port
+            SPIPortFS spiPort = new SPIPortFS(spiID);
+            // open the slave devices. We are using GPIO_4 and GPIO_17 as slave selects
+            // but we always have to open CE0 or CE1 - but we cannot use it and it must
+            // not be electrically connected to anything.
+            SPISlaveDeviceHandle ssHandleCE1 = spiPort.EnableSPISlaveDevice(SPISlaveDeviceEnum.SPI_SLAVEDEVICE_CE1);
+            if (ssHandleCE1 == null)
+            {
+                throw new Exception("ssHandleCE1 == null");
+            }
+            SPISlaveDeviceHandle ssHandleGPIO4 = spiPort.EnableSPIGPIOSlaveDevice(GpioEnum.GPIO_4);
+            if (ssHandleGPIO4 == null)
+            {
+                throw new Exception("ssHandleGPIO4 == null");
+            }
+            SPISlaveDeviceHandle ssHandleGPIO17 = spiPort.EnableSPIGPIOSlaveDevice(GpioEnum.GPIO_17);
+            if (ssHandleGPIO17 == null)
+            {
+                throw new Exception("ssHandleGPIO17 == null");
+            }
+                
+            // set the mode
+            spiPort.SetMode(SPIModeEnum.SPI_MODE_0);
+
+            // set our speed
+            spiPort.SetDefaultSpeedInHz(25000);
+
+            // set up our transmit and receive buffers
+            int bufLen = 4;
+            byte[] txByteBuf = new byte[bufLen];
+            byte[] rxByteBuf = new byte[bufLen];
+
+            // populate the transmit buffer with data "9876"
+            txByteBuf[0] = 0x39;
+            txByteBuf[1] = 0x38;
+            txByteBuf[2] = 0x37;
+            txByteBuf[3] = 0x36;
+
+            // NOTE that other than opening ssHandleCE1 we do not write to it. The pin
+            // where the CE1 appears should not be electrically attached to any SPI device
+            // When using GPIO based slave selects lines all SPI devices must use them
+            // when using the internal CE0 or CE1 lines all devices must use those. You
+            // cannot mix and match GPIO and CE* slave select lines.
+
+            // transfer the data to the device listening on GPIO4
+            spiPort.SPITransfer(ssHandleGPIO4, txByteBuf, rxByteBuf, bufLen);
+
+            // populate the transmit buffer with new data "5432"
+            txByteBuf[0] = 0x35;
+            txByteBuf[1] = 0x34;
+            txByteBuf[2] = 0x33;
+            txByteBuf[3] = 0x32;
+
+            // transmit the new data to the device listening on GPIO17
+            spiPort.SPITransfer(ssHandleGPIO17, txByteBuf, rxByteBuf, bufLen);
+
+            // close the port
+            spiPort.ClosePort();
+            spiPort.Dispose();
+        }
+</pre> 
+In the above code, the <code>spiID</code> is passed in when the function was called. This value is a member of the 
+<code><a href="RPICSIOHelp_SPIPortEnum.html">SPIPortEnum class</a></code> which lists all possible SPI ports which
+can be present on the Raspberry Pi. The above code is called via a line which looks like:
+<pre>
+SPIPortFSGPOISSTest(SPIPortEnum.SPIPORT_0);
+</pre> 
+<P>
+&nbsp;
+<P>
+<div class="navbar">&lt;&lt; <A href="RPICSIOHelp_Examples.html"> Back </A> 
+|| <a href="RPICSIOHelp_TableOfContents.html">Table of Contents</a> 
+|| <a href="RPICSIOHelp_Examples.html">RPICSIO Example Code</a> 
+|| <a href="http://www.OfItselfSo.com/RPICSIO/RPICSIO.php">Home Page</a> 
+|| <A href="RPICSIOHelp_Examples.html"> Next </A> &gt;&gt;</div>
+<P>
+
+
+</body>
+</html>
+
