@@ -15,4 +15,4 @@ At the current time, RPICSIO has only been tested on the Raspberry Pi 2. Most th
 - Tested with the Mono JIT compiler v3.2.8 but is probably also compatible with other versions.
 - The software is written in C# and a .NET project is included with the source code. 
 
-The RPICSIO Project is open source and released under the MIT License. The home page for this project can be found at [http://www.OfItselfSo.com/ RPICSIO](http://www.OfItselfSo.com/ RPICSIO) and contains a zip file with the compiled dll, help files, manual, sample code and other useful advice and assistance.
+The RPICSIO Project is open source and released under the MIT License. The home page for this project can be found at [http://www.OfItselfSo.com/RPICSIO](http://www.OfItselfSo.com/RPICSIO) and contains a zip file with the compiled dll, help files, manual, sample code and other useful advice and assistance.
