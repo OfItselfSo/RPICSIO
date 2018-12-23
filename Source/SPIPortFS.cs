@@ -134,7 +134,9 @@ namespace RPICSIO
             // set up our file descriptor
             // are we an internal chip select type slave device?
             if ((ssHandle.SPISlaveDevice == SPISlaveDeviceEnum.SPI_SLAVEDEVICE_CE0) ||
-                (ssHandle.SPISlaveDevice == SPISlaveDeviceEnum.SPI_SLAVEDEVICE_CE1))
+                (ssHandle.SPISlaveDevice == SPISlaveDeviceEnum.SPI_SLAVEDEVICE_CE1) ||
+                (ssHandle.SPISlaveDevice == SPISlaveDeviceEnum.SPI_SLAVEDEVICE_CE2) ||
+                (ssHandle.SPISlaveDevice == SPISlaveDeviceEnum.SPI_SLAVEDEVICE_CE3))
             {
                 // yes we are, just use this descriptor
                 spiFileDescriptor = ssHandle.SpiDevFileDescriptor;
@@ -181,7 +183,7 @@ namespace RPICSIO
                 xfer.tx_buf = txBufPtr;
                 xfer.rx_buf = rxBufPtr;
                 xfer.len = (UInt32)numBytes;
-                xfer.speed_hz = (UInt16)ssHandle.SpeedInHz;
+				xfer.speed_hz = ssHandle.SpeedInHz;
                 xfer.delay_usecs = ssHandle.DelayUSecs;
                 xfer.bits_per_word = ssHandle.BitsPerWord;
                 xfer.cs_change = ssHandle.CSChange;
@@ -417,7 +419,15 @@ namespace RPICSIO
             {
                 deviceFileName = deviceFileName.Replace("%slave%", "1");
             }
-            else
+ 			else if (spiSlaveDeviceIn == SPISlaveDeviceEnum.SPI_SLAVEDEVICE_CE2)
+            {
+				deviceFileName = deviceFileName.Replace("%slave%", "2");
+            }
+            else if (spiSlaveDeviceIn == SPISlaveDeviceEnum.SPI_SLAVEDEVICE_CE3)
+            {
+				deviceFileName = deviceFileName.Replace("%slave%", "3");
+            }
+           else
             {
                 // should never happen
                 throw new Exception ("Unknown SPI Slave Device:" + spiSlaveDeviceIn.ToString());
