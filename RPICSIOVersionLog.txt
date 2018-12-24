@@ -1,8 +1,11 @@
 RPICSIO Software Version Change Log
 
-Version 01.00 - 13 Jan. 2017 
+Version 01.00.00 - 13 Jan. 2017 
     First Release 
 
-Version 01.00 - 17 Dec. 2018
+Version 01.00.00 - 17 Dec. 2018
     Placed up on GitHub
 
+Version 01.00.01 - 24 Dec. 2018 (thank you PR!)
+    Added I2CTransfer() function to I2CPortFS.cs for I2C_RDWR ioctl functions
+    Added support for SPI Slave ports 2 and 3
