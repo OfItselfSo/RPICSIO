@@ -59,7 +59,8 @@ namespace RPICSIO
         // them together. I have not attempted to reproduce this build here and simply
         // use the end result since the resulting value is essentially constant for
         // an particular ioctl call to a specific driver type
-        uint I2C_DEV = 0x00000703;
+        uint I2C_DEV  = 0x00000703;
+		uint I2C_RDWR = 0x00000707;	// Combined R/W transfer (one STOP only)
 
         /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
         /// <summary>
@@ -193,13 +194,94 @@ namespace RPICSIO
 
         /// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
         /// <summary>
-        /// Opens the port. Throws an exception on failure
+        /// Writes/Reads a buffer in from an I2C slave device using I2C_RDWR function.
         /// 
         /// </summary>
+        /// <param name="devID">The I2C Device ID to write to</param>
+        /// <param name="txByteBuf">The buffer with bytes to write, can be null for read only</param>
+        /// <param name="txBytes">The number of bytes to write, can be 0 for read only
+        /// <param name="rxByteBuf">The buffer with bytes to read, can be null for write only</param>
+        /// <param name="rxBytes">The number of bytes to read, can be 0 for write only
         /// <history>
-        ///    01 Dec 16  Cynic - Originally written
+        ///    19 Dec 18  Ridler - Originally written
         /// </history>
-        protected override void OpenPort()
+		public void I2CTransfer (int devID, byte[] txByteBuf, int txBytes, byte[] rxByteBuf, int rxBytes)
+        {
+            int ioctlRetVal = -1;
+            if (i2CPortFD <= 0)
+            {	throw new Exception ("I2C port is not open, fd=0");
+            }
+            if (PortIsOpen == false)
+            {	throw new Exception ("I2C port is not open");
+            }
+			i2c_msg[] msgs = new i2c_msg[2];
+			uint nmsgs = 0;
+			IntPtr txBufPtr = IntPtr.Zero;
+			IntPtr rxBufPtr = IntPtr.Zero;
+			if (txByteBuf != null && txBytes != 0)
+			{	txBufPtr = Marshal.AllocHGlobal (txBytes + 1);
+				// copy the data from the tx buffer to our pointer               
+				Marshal.Copy (txByteBuf, 0, txBufPtr, txBytes);
+				msgs[nmsgs].addr = (UInt16) devID;
+				msgs[nmsgs].flags = 0;
+				msgs[nmsgs].len = (UInt16) txBytes;
+				msgs[nmsgs].buf = txBufPtr;
+				nmsgs++;
+			}
+			if (rxByteBuf != null && rxBytes != 0)
+			{	rxBufPtr = Marshal.AllocHGlobal (rxBytes + 1);
+				msgs[nmsgs].addr = (UInt16) devID;
+				msgs[nmsgs].flags = 1;	// I2C_M_RD;
+				msgs[nmsgs].len = (UInt16) rxBytes;
+				msgs[nmsgs].buf = rxBufPtr;
+				nmsgs++;
+			}
+			// interpret it as an input error if nothing has to be done
+			if (nmsgs == 0)
+			{	throw new Exception ("I2CTransfer on I2C device " + devID.ToString () + " has nothing to write or read!");
+			}
+			int msg_size = Marshal.SizeOf (typeof (i2c_msg));   // should be 12....
+			IntPtr msgbuffer = Marshal.AllocHGlobal (msg_size * 2);
+			IntPtr ptr = msgbuffer;
+			for (uint ndx = 0; ndx < nmsgs; ndx++)
+			{	Marshal.StructureToPtr (msgs[ndx], ptr, false);
+				ptr += msg_size;
+			}
+			i2c_rdwr_ioctl_data i2c_data = new i2c_rdwr_ioctl_data();
+			i2c_data.msgs = msgbuffer;
+			i2c_data.nmsgs = nmsgs;
+			try
+			{	ioctlRetVal = ExternalIoCtl (i2CPortFD, I2C_RDWR, ref i2c_data);
+				if (ioctlRetVal < 0)
+				{   // it failed
+					throw new Exception ("ExternalIoCtl on I2C device " + devID.ToString () + " failed. retval=" + ioctlRetVal.ToString ());
+				}
+				// did the caller supply a receive buffer
+				if (rxByteBuf != null)
+				{   // yes they did, copy the returned data in
+					Marshal.Copy (rxBufPtr, rxByteBuf, 0, rxBytes);
+				}
+			}
+			finally
+			{	if (txBufPtr != IntPtr.Zero)
+				{	Marshal.FreeHGlobal (txBufPtr);
+				}
+				if (rxBufPtr != IntPtr.Zero)
+				{	Marshal.FreeHGlobal (rxBufPtr);
+				}
+				Marshal.FreeHGlobal (msgbuffer);
+			}
+		}
+
+		/// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+		/// <summary>
+		/// Opens the port. Throws an exception on failure
+		/// 
+		/// </summary>
+		/// <history>
+		///    01 Dec 16  Cynic - Originally written
+		/// </history>
+		protected override void OpenPort()
         {
             string deviceFileName;
             // set up now
@@ -354,6 +436,9 @@ namespace RPICSIO
 
         [DllImport("libc", EntryPoint = "ioctl")]
         static extern int ExternalIoCtl(int fd, uint request, int intVal);
+
+        [DllImport("libc", EntryPoint = "ioctl")]
+        static extern int ExternalIoCtl(int fd, uint request, ref i2c_rdwr_ioctl_data xfer);
 
         [DllImport("libc", EntryPoint = "open")]
         static extern int ExternalFileOpen(string path, int flags);

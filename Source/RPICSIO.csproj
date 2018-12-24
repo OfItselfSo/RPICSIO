@@ -36,6 +36,7 @@
     <Reference Include="Mono.Posix" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="I2C_IOC_Transfer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Port.cs" />
     <Compile Include="PortFS.cs" />
