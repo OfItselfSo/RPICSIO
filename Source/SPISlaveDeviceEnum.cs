@@ -30,6 +30,8 @@ namespace RPICSIO
         SPI_SLAVEDEVICE_NONE,
         SPI_SLAVEDEVICE_CE0,   // the slave device on the CE0 pin
         SPI_SLAVEDEVICE_CE1,   // the slave device on the CE1 pin
+        SPI_SLAVEDEVICE_CE2,   // the slave device on the CE2 pin
+        SPI_SLAVEDEVICE_CE3,   // the slave device on the CE3 pin
         SPI_SLAVEDEVICE_GPIO   // the slave uses a GPIO pin
     }
 }
